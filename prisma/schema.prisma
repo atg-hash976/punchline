@@ -1,0 +1,115 @@
+// Caption Contest data model
+// Postgres locally (via Homebrew, see README) and in production (Supabase/Neon/
+// Vercel Postgres/etc. — anything that hands you a postgresql:// URL works).
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Comic {
+  id            String   @id @default(cuid())
+  imageUrl      String
+  artistName    String? // null/empty = AI-generated, filled in once you commission illustrators
+  releaseAt     DateTime // e.g. 10:00 AM CT daily
+  freezeAt      DateTime // e.g. midnight CT same day — leaderboard locks here
+  createdAt     DateTime @default(now())
+
+  captions      Caption[]
+  matchups      Matchup[]
+  snapshots     LeaderboardSnapshot[]
+
+  @@index([releaseAt])
+}
+
+// Records the moment a given session "opens" a comic (blur -> clear).
+// This starts their personal 10-minute submission window. Tracked server-side
+// so the window can't be spoofed by sending a fake client timestamp.
+model ComicOpen {
+  id         String   @id @default(cuid())
+  comicId    String
+  sessionId  String
+  openedAt   DateTime @default(now())
+
+  @@unique([comicId, sessionId]) // opening is a one-time action per person per comic
+}
+
+model Caption {
+  id             String   @id @default(cuid())
+  comicId        String
+  comic          Comic    @relation(fields: [comicId], references: [id])
+
+  username       String
+  city           String?  // optional, shown on share card
+  text           String
+  normalizedText String   // lowercased, whitespace/punctuation-normalized, for dup + gratuitous checks
+
+  sessionId      String   // anon cookie id of submitter, for rate limiting / "your own captions"
+  submittedAt    DateTime @default(now())
+  withinWindow   Boolean  @default(true) // true if submitted within 10 min of user's own "open" time
+
+  matchupsWon    Matchup[] @relation("MatchupWinner")
+  matchupsLost   Matchup[] @relation("MatchupLoser")
+  snapshots      LeaderboardSnapshot[]
+  reports        Report[]
+
+  @@index([comicId])
+  @@index([comicId, normalizedText]) // fast duplicate lookups
+  @@index([comicId, submittedAt])    // "New" tab
+}
+
+// One head-to-head vote: a session was shown two captions and picked a winner.
+// Win-rate (wins / total matchups) replaces raw like counts as the ranking signal —
+// only sessions that submitted a caption get prompted to judge matchups.
+model Matchup {
+  id              String   @id @default(cuid())
+  comicId         String
+  comic           Comic    @relation(fields: [comicId], references: [id])
+  winnerCaptionId String
+  winner          Caption  @relation("MatchupWinner", fields: [winnerCaptionId], references: [id])
+  loserCaptionId  String
+  loser           Caption  @relation("MatchupLoser", fields: [loserCaptionId], references: [id])
+  sessionId       String   // anon cookie id of the judge
+  createdAt       DateTime @default(now())
+
+  @@index([comicId])
+  @@index([winnerCaptionId])
+  @@index([loserCaptionId])
+}
+
+// A frozen, permanent record of final standings — written once at freezeAt.
+// Keeps "who actually won" stable even if live Matchup rows are later touched/cleaned up.
+model LeaderboardSnapshot {
+  id         String   @id @default(cuid())
+  comicId    String
+  comic      Comic    @relation(fields: [comicId], references: [id])
+  captionId  String
+  caption    Caption  @relation(fields: [captionId], references: [id])
+  winCount   Int
+  matchCount Int
+  winRate    Float
+  rank       Int
+  takenAt    DateTime @default(now())
+
+  @@index([comicId, rank])
+}
+
+// A user-flagged caption — the human backstop for whatever the automated
+// moderation (slurs/profanity/spam heuristics) misses. Reporting has no
+// unlock-gate: anyone who can see a caption can flag it, unlike voting which
+// is restricted to submitters. One report per (caption, session) — repeat
+// taps are a no-op, not a way to inflate a caption's report count.
+model Report {
+  id        String   @id @default(cuid())
+  captionId String
+  caption   Caption  @relation(fields: [captionId], references: [id])
+  sessionId String   // anon cookie id of the reporter
+  createdAt DateTime @default(now())
+
+  @@unique([captionId, sessionId])
+  @@index([captionId])
+}
