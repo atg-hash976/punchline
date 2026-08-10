@@ -45,7 +45,7 @@ export default function ComicCard({ comicId, imageUrl, initialOpenedAt, onOpened
             disabled={loading}
             className="flex items-center gap-2 px-5 py-3 rounded-full bg-card text-ink text-sm font-semibold shadow-pop hover:scale-105 active:scale-95 transition disabled:opacity-60"
           >
-            <Sparkles size={16} className="text-teal shrink-0" strokeWidth={2.25} />
+            <Sparkles size={16} className="text-blue shrink-0" strokeWidth={2.25} />
             {loading ? "Revealing…" : `Reveal comic — ${SUBMISSION_WINDOW_MINUTES} min to caption it`}
           </button>
         </div>

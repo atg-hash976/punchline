@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   TrendingUp,
   Sparkles,
@@ -27,11 +27,43 @@ type Caption = {
 
 type Tab = "rising" | "new" | "top" | "leaderboard";
 
-const TABS: { id: Tab; label: string; icon: typeof TrendingUp }[] = [
-  { id: "rising", label: "Rising", icon: TrendingUp },
-  { id: "new", label: "New", icon: Sparkles },
-  { id: "top", label: "Top", icon: Trophy },
-  { id: "leaderboard", label: "Leaderboard", icon: ListOrdered },
+// Each tab gets its own color identity — thematically: Rising = growth (green),
+// New = fresh (coral), Top = trophy (gold), Leaderboard = live data (blue).
+const TABS: {
+  id: Tab;
+  label: string;
+  icon: typeof TrendingUp;
+  active: string;
+  inactive: string;
+}[] = [
+  {
+    id: "rising",
+    label: "Rising",
+    icon: TrendingUp,
+    active: "bg-forest text-white",
+    inactive: "text-forest-dark hover:bg-forest-light",
+  },
+  {
+    id: "new",
+    label: "New",
+    icon: Sparkles,
+    active: "bg-coral text-white",
+    inactive: "text-coral-dark hover:bg-coral-light",
+  },
+  {
+    id: "top",
+    label: "Top",
+    icon: Trophy,
+    active: "bg-gold text-white",
+    inactive: "text-gold-dark hover:bg-gold-light",
+  },
+  {
+    id: "leaderboard",
+    label: "Leaderboard",
+    icon: ListOrdered,
+    active: "bg-blue text-white",
+    inactive: "text-blue-dark hover:bg-blue-light",
+  },
 ];
 
 // The leaderboard tab is just a different *display* of Top's ranking — same
@@ -41,11 +73,24 @@ function serverTabFor(tab: Tab): "rising" | "new" | "top" {
   return tab === "leaderboard" ? "top" : tab;
 }
 
+const TAB_ORDER: Tab[] = TABS.map((t) => t.id);
+
 export default function CaptionFeed({ comicId }: { comicId: string }) {
   const [tab, setTab] = useState<Tab>("rising");
   const [captions, setCaptions] = useState<Caption[]>([]);
   const [locked, setLocked] = useState(true);
   const [index, setIndex] = useState(0);
+  // Which way the content should slide in — based on tab order, not clicks,
+  // so it reads consistently regardless of how you got there.
+  const [slideDir, setSlideDir] = useState<"right" | "left">("right");
+  const prevTabIndex = useRef(0);
+
+  function handleTabClick(id: Tab) {
+    const newIndex = TAB_ORDER.indexOf(id);
+    setSlideDir(newIndex >= prevTabIndex.current ? "right" : "left");
+    prevTabIndex.current = newIndex;
+    setTab(id);
+  }
 
   async function load(activeTab: Tab) {
     const res = await fetch(`/api/captions?comicId=${comicId}&tab=${serverTabFor(activeTab)}`);
@@ -86,12 +131,12 @@ export default function CaptionFeed({ comicId }: { comicId: string }) {
     <div className="space-y-3">
       <div className="flex justify-center">
         <div className="inline-flex gap-1 p-1 bg-card rounded-full shadow-soft ring-1 ring-ink/5">
-          {TABS.map(({ id, label, icon: Icon }) => (
+          {TABS.map(({ id, label, icon: Icon, active, inactive }) => (
             <button
               key={id}
-              onClick={() => setTab(id)}
+              onClick={() => handleTabClick(id)}
               className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition ${
-                tab === id ? "bg-ink text-cream shadow-soft" : "text-ink-muted hover:bg-ink/5"
+                tab === id ? `${active} shadow-soft` : inactive
               }`}
             >
               <Icon size={13} strokeWidth={2.25} />
@@ -101,6 +146,10 @@ export default function CaptionFeed({ comicId }: { comicId: string }) {
         </div>
       </div>
 
+      <div
+        key={tab}
+        className={`space-y-3 ${slideDir === "right" ? "animate-slide-in-right" : "animate-slide-in-left"}`}
+      >
       {captions.length === 0 ? (
         <div className="flex flex-col items-center gap-2 text-center text-ink-muted text-sm p-8 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5">
           <PenLine size={18} strokeWidth={2} className="text-ink-faint" />
@@ -108,10 +157,10 @@ export default function CaptionFeed({ comicId }: { comicId: string }) {
         </div>
       ) : tab === "leaderboard" ? (
         <>
-          <p className="flex items-center justify-center gap-1.5 font-mono text-[11px] tracking-[0.1em] uppercase text-teal-dark">
+          <p className="flex items-center justify-center gap-1.5 font-mono text-[11px] tracking-[0.1em] uppercase text-blue-dark">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-teal" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue" />
             </span>
             Live standings
           </p>
@@ -136,7 +185,7 @@ export default function CaptionFeed({ comicId }: { comicId: string }) {
                 {captions[index].city ? `, ${captions[index].city}` : ""}
               </p>
               {tab === "top" && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-light text-teal-dark font-mono text-xs font-medium">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold-light text-gold-dark font-mono text-xs font-medium">
                   <Trophy size={12} strokeWidth={2.5} />
                   {captions[index].matches > 0
                     ? `${Math.round(captions[index].winRate * 100)}% win rate`
@@ -163,6 +212,7 @@ export default function CaptionFeed({ comicId }: { comicId: string }) {
           </p>
         </>
       )}
+      </div>
     </div>
   );
 }

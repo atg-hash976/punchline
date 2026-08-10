@@ -23,7 +23,7 @@ export default function ResultsReveal({
       </div>
 
       <header className="text-center space-y-1">
-        <p className="flex items-center justify-center gap-1.5 font-mono text-[11px] tracking-[0.15em] uppercase text-teal-dark">
+        <p className="flex items-center justify-center gap-1.5 font-mono text-[11px] tracking-[0.15em] uppercase text-gold-dark">
           <Trophy size={13} strokeWidth={2.5} />
           {eyebrow}
         </p>

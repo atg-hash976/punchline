@@ -30,7 +30,7 @@ export default function ArchivePage() {
   return (
     <main className="max-w-lg mx-auto px-4 py-8 space-y-5">
       <header className="text-center space-y-1">
-        <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-teal-dark">
+        <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-blue-dark">
           Daily Caption Contest
         </p>
         <h1 className="font-display text-3xl font-bold text-ink">Past Days</h1>
@@ -54,7 +54,7 @@ export default function ArchivePage() {
             <li key={entry.id}>
               <Link
                 href={`/archive/${entry.id}`}
-                className="flex items-center gap-3 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5 p-3 hover:ring-teal/40 transition"
+                className="flex items-center gap-3 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5 p-3 hover:ring-blue/40 transition"
               >
                 <img
                   src={entry.imageUrl}
@@ -66,7 +66,7 @@ export default function ArchivePage() {
                   {entry.champion ? (
                     <>
                       <p className="text-sm text-ink truncate flex items-center gap-1">
-                        <Trophy size={12} strokeWidth={2.5} className="text-teal shrink-0" />"
+                        <Trophy size={12} strokeWidth={2.5} className="text-gold-dark shrink-0" />"
                         {entry.champion.text}"
                       </p>
                       <p className="text-xs font-mono text-ink-muted truncate">

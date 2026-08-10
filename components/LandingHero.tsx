@@ -34,8 +34,8 @@ export default function LandingHero({ yesterday, onPlay, onBrowse }: Props) {
             <img src={yesterday.imageUrl} alt="Yesterday's comic" className="w-full" />
           </div>
 
-          <div className="relative bg-card rounded-xl2 shadow-card ring-2 ring-teal/40 p-5 pt-6 text-center space-y-2">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-teal text-white flex items-center justify-center shadow-soft">
+          <div className="relative bg-card rounded-xl2 shadow-card ring-2 ring-gold/50 p-5 pt-6 text-center space-y-2">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gold text-white flex items-center justify-center shadow-soft">
               <Trophy size={16} strokeWidth={2.5} />
             </div>
             <p className="text-lg leading-snug text-ink">"{yesterday.champion.text}"</p>

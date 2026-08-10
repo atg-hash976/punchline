@@ -1,6 +1,7 @@
 "use client";
 
 import { PartyPopper, Share2 } from "lucide-react";
+import Confetti from "./Confetti";
 
 type Props = {
   caption: { username: string; city?: string; text: string };
@@ -8,6 +9,7 @@ type Props = {
   onClose: () => void;
   heading?: string;
   subheading?: string;
+  celebrate?: boolean;
 };
 
 export default function ShareModal({
@@ -16,6 +18,7 @@ export default function ShareModal({
   onClose,
   heading = "Thanks for your submission!",
   subheading = "Would you like to share it?",
+  celebrate = true,
 }: Props) {
   const shareText = `"${caption.text}" — ${caption.username}${
     caption.city ? ` (${caption.city})` : ""
@@ -40,10 +43,11 @@ export default function ShareModal({
 
   return (
     <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 p-4">
+      {celebrate && <Confetti />}
       <div className="bg-card rounded-xl2 p-6 max-w-sm w-full space-y-4 text-center shadow-pop ring-1 ring-ink/5">
         <h2 className="font-display text-xl font-bold text-ink flex items-center justify-center gap-2">
           {heading}
-          <PartyPopper size={20} className="text-teal" strokeWidth={2.25} />
+          <PartyPopper size={20} className="text-blue" strokeWidth={2.25} />
         </h2>
         <p className="text-sm text-ink-muted">{subheading}</p>
         <img src={imageUrl} alt="" className="rounded-lg w-full ring-1 ring-ink/5" />

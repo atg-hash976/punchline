@@ -60,28 +60,28 @@ export default function SubmitCaptionForm({ comicId, windowExpired, onSubmitted,
       className="space-y-2.5 p-5 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5"
     >
       <div className="relative">
-        <User size={15} strokeWidth={2.25} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
+        <User size={15} strokeWidth={2.25} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-dark/60" />
         <input
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="Username (required)"
           required
           maxLength={24}
-          className="w-full text-sm border border-ink/10 rounded-lg pl-9 pr-3 py-2.5 placeholder:text-ink-faint focus:border-teal focus:ring-2 focus:ring-teal/20 transition"
+          className="w-full text-sm font-mono text-blue-dark bg-sand rounded-full pl-10 pr-4 py-2.5 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/40 transition"
         />
       </div>
       <div className="relative">
-        <MapPin size={15} strokeWidth={2.25} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
+        <MapPin size={15} strokeWidth={2.25} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-dark/60" />
         <input
           value={city}
           onChange={(e) => setCity(e.target.value)}
           placeholder="City (optional)"
           maxLength={40}
-          className="w-full text-sm border border-ink/10 rounded-lg pl-9 pr-3 py-2.5 placeholder:text-ink-faint focus:border-teal focus:ring-2 focus:ring-teal/20 transition"
+          className="w-full text-sm font-mono text-blue-dark bg-sand rounded-full pl-10 pr-4 py-2.5 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/40 transition"
         />
       </div>
       <div className="relative">
-        <MessageSquareText size={15} strokeWidth={2.25} className="absolute left-3 top-3 text-ink-faint" />
+        <MessageSquareText size={15} strokeWidth={2.25} className="absolute left-4 top-3.5 text-blue-dark/60" />
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -89,7 +89,7 @@ export default function SubmitCaptionForm({ comicId, windowExpired, onSubmitted,
           required
           maxLength={200}
           rows={3}
-          className="w-full text-sm border border-ink/10 rounded-lg pl-9 pr-3 py-2.5 placeholder:text-ink-faint focus:border-teal focus:ring-2 focus:ring-teal/20 transition resize-none"
+          className="w-full text-sm font-mono text-blue-dark bg-sand rounded-xl2 pl-10 pr-4 py-3 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/40 transition resize-none"
         />
       </div>
       {error && <p className="text-coral-dark text-xs font-medium">{error}</p>}

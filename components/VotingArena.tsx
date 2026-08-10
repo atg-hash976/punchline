@@ -16,6 +16,9 @@ export default function VotingArena({ comicId, onDone }: Props) {
   const [round, setRound] = useState(1);
   const [voting, setVoting] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
+  // The picked card holds a green "burst" for a beat before the loser gets
+  // replaced — purely a feel/feedback delay, not tied to the actual request.
+  const [winningId, setWinningId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/captions/matchup?comicId=${comicId}&count=2`)
@@ -30,7 +33,11 @@ export default function VotingArena({ comicId, onDone }: Props) {
   async function handlePick(winner: Challenger, loser: Challenger) {
     if (voting || !pair) return;
     setVoting(true);
+    setWinningId(winner.id);
     try {
+      // Let the burst animation actually play before the loser gets swapped out.
+      await new Promise((resolve) => setTimeout(resolve, 420));
+
       await fetch("/api/captions/matchup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -52,6 +59,7 @@ export default function VotingArena({ comicId, onDone }: Props) {
       setRound((r) => r + 1);
     } finally {
       setVoting(false);
+      setWinningId(null);
     }
   }
 
@@ -80,7 +88,7 @@ export default function VotingArena({ comicId, onDone }: Props) {
   return (
     <div className="space-y-3">
       <header className="text-center space-y-1">
-        <p className="flex items-center justify-center gap-1.5 font-mono text-[11px] tracking-[0.15em] uppercase text-teal-dark">
+        <p className="flex items-center justify-center gap-1.5 font-mono text-[11px] tracking-[0.15em] uppercase text-blue-dark">
           <Swords size={13} strokeWidth={2.5} />
           Round {round}
         </p>
@@ -101,8 +109,14 @@ export default function VotingArena({ comicId, onDone }: Props) {
                 handlePick(c, c.id === a.id ? b : a);
               }
             }}
-            className={`flex flex-col justify-between gap-3 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5 p-4 text-left hover:ring-teal/40 hover:shadow-card active:scale-95 transition cursor-pointer ${
-              voting ? "opacity-60 pointer-events-none" : ""
+            className={`flex flex-col justify-between gap-3 bg-card rounded-xl2 shadow-soft p-4 text-left transition cursor-pointer ${
+              voting ? "pointer-events-none" : ""
+            } ${
+              c.id === winningId
+                ? "ring-2 ring-forest animate-winner-burst"
+                : `ring-1 ring-ink/5 hover:ring-forest/50 hover:bg-forest-light/40 hover:shadow-card active:scale-95 ${
+                    voting ? "opacity-40" : ""
+                  }`
             }`}
           >
             <p className="text-sm leading-snug text-ink">"{c.text}"</p>

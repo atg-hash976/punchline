@@ -15,7 +15,7 @@ export type LeaderboardEntry = {
 
 function YouBadge() {
   return (
-    <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-teal-light text-teal-dark text-[10px] font-semibold align-middle">
+    <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-blue-light text-blue-dark text-[10px] font-semibold align-middle">
       YOU
     </span>
   );
@@ -33,8 +33,8 @@ export default function Leaderboard({ results }: { results: LeaderboardEntry[] }
   return (
     <div className="space-y-3">
       {first && (
-        <div className="relative bg-card rounded-xl2 shadow-card ring-2 ring-teal/40 p-5 pt-6 text-center space-y-2">
-          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-teal text-white flex items-center justify-center shadow-soft">
+        <div className="relative bg-card rounded-xl2 shadow-card ring-2 ring-gold/50 p-5 pt-6 text-center space-y-2">
+          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gold text-white flex items-center justify-center shadow-soft">
             <Trophy size={16} strokeWidth={2.5} />
           </div>
           <p className="text-lg leading-snug text-ink">"{first.text}"</p>
@@ -90,7 +90,7 @@ export default function Leaderboard({ results }: { results: LeaderboardEntry[] }
                 <p className="text-xs font-mono text-ink-muted truncate">
                   — {r.username}
                   {r.city ? `, ${r.city}` : ""}
-                  {r.isYou && <span className="ml-1.5 text-teal-dark font-semibold">· YOU</span>}
+                  {r.isYou && <span className="ml-1.5 text-blue-dark font-semibold">· YOU</span>}
                 </p>
               </div>
               <span className="font-mono text-xs text-ink-faint shrink-0">
