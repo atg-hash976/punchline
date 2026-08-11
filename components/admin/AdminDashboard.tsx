@@ -47,6 +47,8 @@ export default function AdminDashboard() {
   const [reportsLoading, setReportsLoading] = useState(true);
   const [reportError, setReportError] = useState<string | null>(null);
   const [editingComic, setEditingComic] = useState<Comic | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const router = useRouter();
 
   const loadComics = useCallback(async () => {
@@ -115,6 +117,23 @@ export default function AdminDashboard() {
     loadReports();
   }
 
+  async function handleDeleteComic(comic: Comic) {
+    if (!window.confirm("Delete this scheduled comic? This can't be undone.")) return;
+    setDeleteError(null);
+    setDeletingId(comic.id);
+    try {
+      const res = await fetch(`/api/admin/comics/${comic.id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setDeleteError(data.error ?? "Couldn't delete that comic.");
+        return;
+      }
+      loadComics();
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   const now = Date.now();
 
   return (
@@ -130,6 +149,7 @@ export default function AdminDashboard() {
 
       <div>
         <h2 className="font-semibold text-lg mb-2">Scheduled comics</h2>
+        {deleteError && <p className="text-red-600 text-sm mb-2">{deleteError}</p>}
         {loading ? (
           <p className="text-neutral-500 text-sm">Loading…</p>
         ) : comics.length === 0 ? (
@@ -168,12 +188,21 @@ export default function AdminDashboard() {
                     <div className="text-neutral-400">Freezes {formatCT(comic.freezeAt)} CT</div>
                   </div>
                   {status.label === "Upcoming" && (
-                    <button
-                      onClick={() => setEditingComic(comic)}
-                      className="text-xs px-3 py-1.5 rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200 shrink-0"
-                    >
-                      Edit
-                    </button>
+                    <div className="flex flex-col gap-1.5 shrink-0">
+                      <button
+                        onClick={() => setEditingComic(comic)}
+                        className="text-xs px-3 py-1.5 rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteComic(comic)}
+                        disabled={deletingId === comic.id}
+                        className="text-xs px-3 py-1.5 rounded-full bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50"
+                      >
+                        {deletingId === comic.id ? "Deleting…" : "Delete"}
+                      </button>
+                    </div>
                   )}
                 </li>
               );

@@ -84,3 +84,30 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   return NextResponse.json({ comic });
 }
+
+// ---------------------------------------------------------------------
+// DELETE /api/admin/comics/[id] — remove a not-yet-released comic.
+// Same "hasn't gone live yet" restriction as PATCH — a live comic can
+// have real captions/matchups attached, so it can't be safely deleted;
+// an upcoming one can't have any yet, so this is always a clean removal.
+// ---------------------------------------------------------------------
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  if (!isAdminAuthenticated()) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  const existing = await prisma.comic.findUnique({ where: { id: params.id } });
+  if (!existing) {
+    return NextResponse.json({ error: "Comic not found" }, { status: 404 });
+  }
+  if (existing.releaseAt <= new Date()) {
+    return NextResponse.json(
+      { error: "This comic has already gone live and can no longer be deleted." },
+      { status: 403 }
+    );
+  }
+
+  await prisma.comic.delete({ where: { id: params.id } });
+
+  return NextResponse.json({ ok: true });
+}
