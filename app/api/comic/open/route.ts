@@ -6,7 +6,7 @@ import { getOrCreateSessionId } from "@/lib/session";
  * Called the moment a user taps to reveal the blurred comic.
  * Idempotent: if this session already opened this comic, returns the
  * original openedAt rather than resetting the clock (prevents re-opening
- * for a fresh 10 minutes by re-navigating to the page).
+ * for a fresh window by re-navigating to the page).
  */
 export async function POST(req: NextRequest) {
   const { comicId } = await req.json();

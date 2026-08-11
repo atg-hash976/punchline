@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { User, MapPin, MessageSquareText } from "lucide-react";
+import { SUBMISSION_WINDOW_MINUTES } from "@/lib/timing";
 
 type Props = {
   comicId: string;
@@ -42,7 +43,7 @@ export default function SubmitCaptionForm({ comicId, windowExpired, onSubmitted,
     return (
       <div className="text-center space-y-3 p-5 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5">
         <p className="text-sm text-ink-muted">
-          Your 10 minutes are up! You can still browse today's top captions.
+          Your {SUBMISSION_WINDOW_MINUTES} minutes are up! You can still browse today's top captions.
         </p>
         <button
           onClick={onForfeit}
@@ -67,7 +68,7 @@ export default function SubmitCaptionForm({ comicId, windowExpired, onSubmitted,
           placeholder="Username (required)"
           required
           maxLength={24}
-          className="w-full text-sm font-mono text-blue-dark bg-sand rounded-full pl-10 pr-4 py-2.5 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/40 transition"
+          className="w-full text-sm font-mono text-blue-dark bg-card border-2 border-blue rounded-full pl-10 pr-4 py-2.5 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/30 transition"
         />
       </div>
       <div className="relative">
@@ -77,7 +78,7 @@ export default function SubmitCaptionForm({ comicId, windowExpired, onSubmitted,
           onChange={(e) => setCity(e.target.value)}
           placeholder="City (optional)"
           maxLength={40}
-          className="w-full text-sm font-mono text-blue-dark bg-sand rounded-full pl-10 pr-4 py-2.5 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/40 transition"
+          className="w-full text-sm font-mono text-blue-dark bg-card border-2 border-blue rounded-full pl-10 pr-4 py-2.5 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/30 transition"
         />
       </div>
       <div className="relative">
@@ -89,7 +90,7 @@ export default function SubmitCaptionForm({ comicId, windowExpired, onSubmitted,
           required
           maxLength={200}
           rows={3}
-          className="w-full text-sm font-mono text-blue-dark bg-sand rounded-xl2 pl-10 pr-4 py-3 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/40 transition resize-none"
+          className="w-full text-sm font-mono text-blue-dark bg-card border-2 border-blue rounded-xl2 pl-10 pr-4 py-3 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/30 transition resize-none"
         />
       </div>
       {error && <p className="text-coral-dark text-xs font-medium">{error}</p>}

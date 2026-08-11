@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 import ComicCard from "@/components/ComicCard";
 import CountdownTimer from "@/components/CountdownTimer";
 import SubmitCaptionForm from "@/components/SubmitCaptionForm";
@@ -10,7 +11,7 @@ import ShareModal from "@/components/ShareModal";
 import VotingArena from "@/components/VotingArena";
 import ResultsReveal from "@/components/ResultsReveal";
 import LandingHero from "@/components/LandingHero";
-import { isWithinSubmissionWindow } from "@/lib/timing";
+import { isWithinSubmissionWindow, formatComicDate } from "@/lib/timing";
 
 type Comic = { id: string; imageUrl: string; releaseAt: string; freezeAt: string };
 type SubmittedCaption = { username: string; city?: string; text: string };
@@ -126,6 +127,9 @@ export default function Home() {
     setOpenedAt(data.openedAt);
     await handleForfeit();
     setShowLanding(false);
+    // Land lurkers in the voting arena first, not straight into the feed —
+    // one extra tap solicits a vote or two before they bail to just browse.
+    setShowVoting(true);
   }
 
   return (
@@ -134,13 +138,16 @@ export default function Home() {
         <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-blue-dark">
           Daily Caption Contest
         </p>
-        <h1 className="font-display text-3xl font-bold text-ink">Today's Cartoon</h1>
-        <Link
-          href="/archive"
-          className="inline-block text-xs text-ink-muted underline decoration-ink-faint underline-offset-2 hover:text-ink transition"
-        >
-          Past winners →
-        </Link>
+        <p className="font-mono text-[11px] text-ink-faint">{formatComicDate(new Date(comic.releaseAt))}</p>
+        <h1 className="font-display text-3xl font-bold text-ink">Punchline</h1>
+        {!showLanding && (
+          <Link
+            href="/archive"
+            className="inline-block text-xs text-ink-muted underline decoration-ink-faint underline-offset-2 hover:text-ink transition"
+          >
+            Past winners →
+          </Link>
+        )}
       </header>
 
       {results ? (
@@ -176,11 +183,25 @@ export default function Home() {
             </>
           )}
 
-          {showVoting ? (
-            <VotingArena comicId={comic.id} onDone={() => setShowVoting(false)} />
-          ) : (
-            <CaptionFeed comicId={comic.id} />
+          {!openedAt && !unlocked && (
+            <button
+              onClick={handleBrowseFromLanding}
+              className="w-full flex items-center justify-center gap-1.5 text-xs text-ink-muted underline decoration-ink-faint underline-offset-2 hover:text-ink transition"
+            >
+              <Eye size={13} strokeWidth={2.25} />
+              Or, just browse and see what others have said today
+            </button>
           )}
+
+          {showVoting ? (
+            <VotingArena
+              comicId={comic.id}
+              onDone={() => setShowVoting(false)}
+              exitLabel={submitted ? undefined : "Just browse instead"}
+            />
+          ) : unlocked ? (
+            <CaptionFeed comicId={comic.id} onStartVoting={() => setShowVoting(true)} />
+          ) : null}
         </>
       )}
 

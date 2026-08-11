@@ -1,8 +1,8 @@
-export const SUBMISSION_WINDOW_MINUTES = 10;
+export const SUBMISSION_WINDOW_MINUTES = 3;
 
 /**
  * Given when a session opened a comic, returns whether "now" is still within
- * their personal 10-minute submission window.
+ * their personal submission window (see SUBMISSION_WINDOW_MINUTES).
  */
 export function isWithinSubmissionWindow(openedAt: Date, now: Date = new Date()): boolean {
   const elapsedMs = now.getTime() - openedAt.getTime();
@@ -18,4 +18,12 @@ export function secondsRemaining(openedAt: Date, now: Date = new Date()): number
 /** Is this comic currently released (visible) and not yet frozen? */
 export function isComicLive(releaseAt: Date, freezeAt: Date, now: Date = new Date()): boolean {
   return now >= releaseAt && now < freezeAt;
+}
+
+/** Long-form date label ("August 10, 2026") in the contest's home timezone. */
+export function formatComicDate(releaseAt: Date): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    dateStyle: "long",
+  }).format(releaseAt);
 }

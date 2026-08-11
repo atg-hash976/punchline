@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Lock,
   PenLine,
+  Swords,
 } from "lucide-react";
 import Leaderboard, { LeaderboardEntry } from "./Leaderboard";
 import ReportButton from "./ReportButton";
@@ -75,7 +76,13 @@ function serverTabFor(tab: Tab): "rising" | "new" | "top" {
 
 const TAB_ORDER: Tab[] = TABS.map((t) => t.id);
 
-export default function CaptionFeed({ comicId }: { comicId: string }) {
+export default function CaptionFeed({
+  comicId,
+  onStartVoting,
+}: {
+  comicId: string;
+  onStartVoting: () => void;
+}) {
   const [tab, setTab] = useState<Tab>("rising");
   const [captions, setCaptions] = useState<Caption[]>([]);
   const [locked, setLocked] = useState(true);
@@ -129,6 +136,16 @@ export default function CaptionFeed({ comicId }: { comicId: string }) {
 
   return (
     <div className="space-y-3">
+      <div className="flex justify-center">
+        <button
+          onClick={onStartVoting}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-coral text-white text-xs font-semibold shadow-soft hover:bg-coral-dark active:scale-95 transition"
+        >
+          <Swords size={13} strokeWidth={2.5} />
+          Judge two captions
+        </button>
+      </div>
+
       <div className="flex justify-center">
         <div className="inline-flex gap-1 p-1 bg-card rounded-full shadow-soft ring-1 ring-ink/5">
           {TABS.map(({ id, label, icon: Icon, active, inactive }) => (

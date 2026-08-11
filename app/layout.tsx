@@ -19,7 +19,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata = {
-  title: "Daily Caption Contest",
+  title: "Punchline",
   description: "A new cartoon every day. Ten minutes to write the best caption.",
 };
 

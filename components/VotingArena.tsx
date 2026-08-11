@@ -9,9 +9,10 @@ type Challenger = { id: string; username: string; city?: string | null; text: st
 type Props = {
   comicId: string;
   onDone: () => void;
+  exitLabel?: string;
 };
 
-export default function VotingArena({ comicId, onDone }: Props) {
+export default function VotingArena({ comicId, onDone, exitLabel = "Done voting — browse captions" }: Props) {
   const [pair, setPair] = useState<Challenger[] | null>(null);
   const [round, setRound] = useState(1);
   const [voting, setVoting] = useState(false);
@@ -139,7 +140,7 @@ export default function VotingArena({ comicId, onDone }: Props) {
           onClick={onDone}
           className="text-xs text-ink-muted underline decoration-ink-faint underline-offset-2 hover:text-ink transition"
         >
-          Done voting — browse captions
+          {exitLabel}
         </button>
       </div>
     </div>

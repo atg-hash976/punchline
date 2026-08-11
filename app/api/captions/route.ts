@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getOrCreateSessionId, hasForfeited } from "@/lib/session";
 import { normalizeCaption, isDuplicate } from "@/lib/duplicate";
 import { checkUsername, checkCaptionText } from "@/lib/moderation";
-import { isWithinSubmissionWindow } from "@/lib/timing";
+import { isWithinSubmissionWindow, SUBMISSION_WINDOW_MINUTES } from "@/lib/timing";
 import { wilsonLowerBound } from "@/lib/ranking";
 
 const RISING_WINDOW_MINUTES = 30;
@@ -101,7 +101,8 @@ export async function POST(req: NextRequest) {
 
   const sessionId = getOrCreateSessionId();
 
-  // 1. Submission window check — must have opened this comic, and be within 10 min.
+  // 1. Submission window check — must have opened this comic, and be within
+  // SUBMISSION_WINDOW_MINUTES.
   const open = await prisma.comicOpen.findUnique({
     where: { comicId_sessionId: { comicId, sessionId } },
   });
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
   }
   if (!isWithinSubmissionWindow(open.openedAt)) {
     return NextResponse.json(
-      { error: "Your 10-minute window for this comic has closed." },
+      { error: `Your ${SUBMISSION_WINDOW_MINUTES}-minute window for this comic has closed.` },
       { status: 403 }
     );
   }

@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getOrCreateSessionId } from "@/lib/session";
+import { getOrCreateSessionId, hasForfeited } from "@/lib/session";
+import { weightedSampleByUndersampling } from "@/lib/ranking";
 
 // ---------------------------------------------------------------------
 // GET /api/captions/matchup?comicId=xxx&excludeIds=a,b&count=1
-// Returns up to `count` random challenger captions — never the caller's own,
-// never one already in excludeIds (the pair currently on screen).
+// Returns up to `count` challenger captions — never the caller's own, never
+// one already in excludeIds (the pair currently on screen). Weighted toward
+// captions with fewer matchups so every caption gets judged enough times for
+// a reliable Wilson score, instead of the same leaders getting shown
+// (and voted for) over and over.
 // ---------------------------------------------------------------------
 export async function GET(req: NextRequest) {
   const comicId = req.nextUrl.searchParams.get("comicId");
@@ -19,28 +23,43 @@ export async function GET(req: NextRequest) {
   const sessionId = getOrCreateSessionId();
   const ownCaption = await prisma.caption.findFirst({ where: { comicId, sessionId } });
 
+  // Voting is open to anyone who has unlocked the feed (submitted or
+  // forfeited today), not just people who submitted a caption.
+  const unlocked = Boolean(ownCaption) || hasForfeited(comicId);
+  if (!unlocked) {
+    return NextResponse.json({ captions: [] });
+  }
+
   const eligible = await prisma.caption.findMany({
     where: {
       comicId,
       id: { notIn: [...excludeIds, ...(ownCaption ? [ownCaption.id] : [])] },
     },
-    select: { id: true, username: true, city: true, text: true },
+    select: {
+      id: true,
+      username: true,
+      city: true,
+      text: true,
+      _count: { select: { matchupsWon: true, matchupsLost: true } },
+    },
   });
 
-  // Fisher-Yates shuffle, then take the front — keeps matchups unpredictable.
-  for (let i = eligible.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [eligible[i], eligible[j]] = [eligible[j], eligible[i]];
-  }
+  const picked = weightedSampleByUndersampling(
+    eligible.map((c) => ({
+      item: { id: c.id, username: c.username, city: c.city, text: c.text },
+      matchCount: c._count.matchupsWon + c._count.matchupsLost,
+    })),
+    count
+  );
 
-  return NextResponse.json({ captions: eligible.slice(0, count) });
+  return NextResponse.json({ captions: picked });
 }
 
 // ---------------------------------------------------------------------
 // POST /api/captions/matchup  { comicId, winnerCaptionId, loserCaptionId }
-// Records one head-to-head vote. Only sessions that submitted a caption for
-// this comic get to judge — matches the "help decide today's winner" prompt
-// that only appears right after submitting.
+// Records one head-to-head vote. Anyone who has unlocked the feed today
+// (submitted a caption or forfeited to browse) can judge — not just
+// submitters, so lurkers help build reliable ranking data too.
 // ---------------------------------------------------------------------
 export async function POST(req: NextRequest) {
   const { comicId, winnerCaptionId, loserCaptionId } = await req.json();
@@ -56,13 +75,14 @@ export async function POST(req: NextRequest) {
 
   const sessionId = getOrCreateSessionId();
   const ownCaption = await prisma.caption.findFirst({ where: { comicId, sessionId } });
-  if (!ownCaption) {
+  const unlocked = Boolean(ownCaption) || hasForfeited(comicId);
+  if (!unlocked) {
     return NextResponse.json(
-      { error: "Submit a caption before judging matchups." },
+      { error: "Submit a caption or browse today's captions before judging matchups." },
       { status: 403 }
     );
   }
-  if (winnerCaptionId === ownCaption.id || loserCaptionId === ownCaption.id) {
+  if (ownCaption && (winnerCaptionId === ownCaption.id || loserCaptionId === ownCaption.id)) {
     return NextResponse.json({ error: "You can't vote on your own caption." }, { status: 403 });
   }
 
