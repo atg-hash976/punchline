@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ComicUploadForm from "./ComicUploadForm";
+import EditComicModal from "./EditComicModal";
 
 type Comic = {
   id: string;
@@ -45,6 +46,7 @@ export default function AdminDashboard() {
   const [reports, setReports] = useState<Report[]>([]);
   const [reportsLoading, setReportsLoading] = useState(true);
   const [reportError, setReportError] = useState<string | null>(null);
+  const [editingComic, setEditingComic] = useState<Comic | null>(null);
   const router = useRouter();
 
   const loadComics = useCallback(async () => {
@@ -165,12 +167,31 @@ export default function AdminDashboard() {
                     </div>
                     <div className="text-neutral-400">Freezes {formatCT(comic.freezeAt)} CT</div>
                   </div>
+                  {status.label === "Upcoming" && (
+                    <button
+                      onClick={() => setEditingComic(comic)}
+                      className="text-xs px-3 py-1.5 rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200 shrink-0"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </li>
               );
             })}
           </ul>
         )}
       </div>
+
+      {editingComic && (
+        <EditComicModal
+          comic={editingComic}
+          onClose={() => setEditingComic(null)}
+          onSaved={() => {
+            setEditingComic(null);
+            loadComics();
+          }}
+        />
+      )}
 
       <div>
         <h2 className="font-semibold text-lg mb-2">Reported captions</h2>

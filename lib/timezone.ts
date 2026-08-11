@@ -55,6 +55,19 @@ export function dateInCT(offsetDays = 0): string {
   return dateStringInCT(new Date(Date.now() + offsetDays * 86400000));
 }
 
+/** Wall-clock time (HH:MM, 24h) that `date` falls on in CT — for <input type="time"> defaults. */
+export function timeStringInCT(date: Date): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: CT_TIME_ZONE,
+    hourCycle: "h23",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(date);
+  const map: Record<string, string> = {};
+  for (const part of parts) map[part.type] = part.value;
+  return `${map.hour}:${map.minute}`;
+}
+
 /** Human-readable CT date label for a comic's releaseAt, e.g. "August 9, 2026" — for the archive. */
 export function dateLabelCT(iso: string): string {
   return new Intl.DateTimeFormat("en-US", {
