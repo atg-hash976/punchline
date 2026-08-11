@@ -62,7 +62,7 @@ export default function LandingHero({ yesterday, streak, onPlay, onBrowse }: Pro
           className="w-full flex items-center justify-center gap-1.5 text-xs text-ink-muted underline decoration-ink-faint underline-offset-2 hover:text-ink transition"
         >
           <Eye size={13} strokeWidth={2.25} />
-          Or, just browse and see what others have said today
+          Don't feel like playing today? Just browse and see what others have said today.
         </button>
       </div>
 
