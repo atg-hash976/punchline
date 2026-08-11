@@ -205,14 +205,6 @@ export async function generateShareCard(input: ShareCardInput): Promise<Blob> {
   ctx.textAlign = "center";
   let y = imgHeight + DIVIDER_HEIGHT + PAD + 34;
 
-  // A large, faint decorative quote mark behind the caption — an echo of
-  // the quotes every caption already sits in throughout the app.
-  ctx.font = "italic 900 220px Georgia, serif";
-  ctx.textAlign = "left";
-  ctx.fillStyle = "rgba(74, 128, 214, 0.10)";
-  ctx.fillText("“", PAD - 24, y + 28);
-  ctx.textAlign = "center";
-
   ctx.font = CAPTION_FONT;
   ctx.fillStyle = "#3A3632";
   for (const line of captionLines) {

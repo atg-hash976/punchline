@@ -58,15 +58,6 @@ export default function OwnCaptionCard({
   return (
     <div className="rounded-xl2 p-[3px]" style={{ background: BRAND_GRADIENT }}>
       <div className="relative overflow-hidden rounded-[calc(1.25rem-3px)] bg-cream px-5 py-4 text-center space-y-2">
-        {/* Faint decorative quote — the same echo as the share card's, so the
-            two visually rhyme as one continuous piece. */}
-        <span
-          aria-hidden
-          className="pointer-events-none select-none absolute -top-2 left-1 font-display italic text-blue/10 text-[80px] leading-none"
-        >
-          &ldquo;
-        </span>
-
         <p className="relative flex items-center justify-center gap-1.5 font-mono text-[10px] tracking-[0.2em] uppercase text-blue-dark">
           <Sparkles size={11} strokeWidth={2.5} />
           Your Punchline
