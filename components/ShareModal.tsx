@@ -1,10 +1,12 @@
 "use client";
 
-import { PartyPopper, Share2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { PartyPopper, Share2, Download } from "lucide-react";
 import Confetti from "./Confetti";
+import { generateShareCard } from "@/lib/shareCard";
 
 type Props = {
-  caption: { username: string; city?: string; text: string };
+  caption: { text: string };
   imageUrl: string;
   onClose: () => void;
   heading?: string;
@@ -20,25 +22,61 @@ export default function ShareModal({
   subheading = "Would you like to share it?",
   celebrate = true,
 }: Props) {
-  const shareText = `"${caption.text}" — ${caption.username}${
-    caption.city ? ` (${caption.city})` : ""
-  }\n\nCaption this: `;
+  const [cardUrl, setCardUrl] = useState<string | null>(null);
+  const [cardBlob, setCardBlob] = useState<Blob | null>(null);
+  const [downloaded, setDownloaded] = useState(false);
+
+  // Composes the real share image (comic + caption overlaid) once on
+  // mount — this IS the shareable artifact, not a link.
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl: string | null = null;
+
+    generateShareCard({ imageUrl, text: caption.text })
+      .then((blob) => {
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(blob);
+        setCardBlob(blob);
+        setCardUrl(objectUrl);
+      })
+      .catch(() => {
+        /* preview just stays in its loading state; Share button stays disabled */
+      });
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleShare() {
-    // NOTE: for a real share-with-image flow, generate a composed image server-side
-    // (caption + username + city stamped onto the comic) and share that file via
-    // navigator.share({ files: [...] }) where supported. This is the text-only
-    // fallback path; see README for the image-composition approach.
-    if (navigator.share) {
+    if (!cardBlob || !cardUrl) return;
+    const file = new File([cardBlob], "punchline.png", { type: "image/png" });
+
+    const canShareFiles =
+      typeof navigator.canShare === "function" && navigator.canShare({ files: [file] });
+
+    if (canShareFiles) {
       try {
-        await navigator.share({ text: shareText, url: window.location.href });
+        await navigator.share({
+          files: [file],
+          title: "Punchline",
+          text: `"${caption.text}"`,
+        });
       } catch {
-        /* user cancelled — no-op */
+        /* user cancelled the share sheet — no-op */
       }
-    } else {
-      // Fallback: SMS deep link
-      window.location.href = `sms:?&body=${encodeURIComponent(shareText + window.location.href)}`;
+      return;
     }
+
+    // Desktop / browsers without file-sharing support: download the card
+    // instead of the old dead SMS-only fallback.
+    const a = document.createElement("a");
+    a.href = cardUrl;
+    a.download = "punchline.png";
+    a.click();
+    setDownloaded(true);
   }
 
   return (
@@ -50,16 +88,18 @@ export default function ShareModal({
           <PartyPopper size={20} className="text-blue" strokeWidth={2.25} />
         </h2>
         <p className="text-sm text-ink-muted">{subheading}</p>
-        <img src={imageUrl} alt="" className="rounded-lg w-full ring-1 ring-ink/5" />
-        <p className="italic text-ink">"{caption.text}"</p>
-        <p className="text-xs font-mono text-ink-muted">
-          — {caption.username}
-          {caption.city ? `, ${caption.city}` : ""}
-        </p>
+
+        {cardUrl ? (
+          <img src={cardUrl} alt="Your Punchline share card" className="rounded-lg w-full ring-1 ring-ink/5" />
+        ) : (
+          <div className="rounded-lg w-full aspect-[4/3] bg-sand animate-pulse" />
+        )}
+
         <div className="flex gap-2 justify-center pt-1">
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-forest text-white text-sm font-semibold shadow-soft hover:bg-forest-dark active:scale-95 transition"
+            disabled={!cardBlob}
+            className="flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-forest text-white text-sm font-semibold shadow-soft hover:bg-forest-dark active:scale-95 transition disabled:opacity-50"
           >
             <Share2 size={14} strokeWidth={2.25} />
             Share
@@ -71,6 +111,13 @@ export default function ShareModal({
             No thanks
           </button>
         </div>
+
+        {downloaded && (
+          <p className="flex items-center justify-center gap-1.5 text-xs text-ink-muted">
+            <Download size={12} strokeWidth={2.25} />
+            Image downloaded — share it wherever you like!
+          </p>
+        )}
       </div>
     </div>
   );

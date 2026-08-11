@@ -45,10 +45,14 @@ export function ctWallTimeToUTC(dateStr: string, timeStr: string): Date {
   return new Date(Date.UTC(year, month - 1, day, hour, minute, 0) - offsetMinutes * 60000);
 }
 
+/** Calendar date (YYYY-MM-DD) that `date` falls on in CT. */
+export function dateStringInCT(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: CT_TIME_ZONE }).format(date);
+}
+
 /** Today's (or offsetDays from today's) date in CT, as "YYYY-MM-DD" — for form defaults. */
 export function dateInCT(offsetDays = 0): string {
-  const instant = new Date(Date.now() + offsetDays * 86400000);
-  return new Intl.DateTimeFormat("en-CA", { timeZone: CT_TIME_ZONE }).format(instant);
+  return dateStringInCT(new Date(Date.now() + offsetDays * 86400000));
 }
 
 /** Human-readable CT date label for a comic's releaseAt, e.g. "August 9, 2026" — for the archive. */

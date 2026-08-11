@@ -114,6 +114,16 @@ export default function CaptionFeed({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
+  useEffect(() => {
+    // The leaderboard is the "results" most players will actually see (most
+    // won't come back for the frozen end-of-day reveal), so it polls live —
+    // ranks animate as votes come in instead of only updating on tab switch.
+    if (tab !== "leaderboard") return;
+    const interval = setInterval(() => load("leaderboard"), 6000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
+
   if (locked) {
     return (
       <div className="flex flex-col items-center gap-2 text-center text-ink-muted text-sm p-8 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5">
@@ -124,6 +134,7 @@ export default function CaptionFeed({
   }
 
   const leaderboardEntries: LeaderboardEntry[] = captions.map((c, i) => ({
+    id: c.id,
     rank: i + 1,
     winCount: c.wins,
     matchCount: c.matches,

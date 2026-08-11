@@ -3,6 +3,8 @@
 import { useState, FormEvent } from "react";
 import { Sparkles } from "lucide-react";
 
+const MAX_CAPTION_LENGTH = 250;
+
 type Props = {
   onGenerate: (caption: { username: string; city?: string; text: string }) => void;
 };
@@ -52,15 +54,24 @@ export default function PracticeCaptionForm({ onGenerate }: Props) {
         maxLength={40}
         className="w-full text-sm font-mono text-blue-dark bg-card border-2 border-blue rounded-full px-4 py-2.5 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/30 transition"
       />
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Your caption…"
-        required
-        maxLength={250}
-        rows={3}
-        className="w-full text-sm font-mono text-blue-dark bg-card border-2 border-blue rounded-xl2 px-4 py-3 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/30 transition resize-none"
-      />
+      <div className="relative">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Your caption…"
+          required
+          maxLength={MAX_CAPTION_LENGTH}
+          rows={3}
+          className="w-full text-sm font-mono text-blue-dark bg-card border-2 border-blue rounded-xl2 px-4 py-3 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/30 transition resize-none"
+        />
+        <span
+          className={`absolute bottom-2 right-3 text-[10px] font-mono ${
+            MAX_CAPTION_LENGTH - text.length <= 20 ? "text-coral-dark font-semibold" : "text-ink-faint"
+          }`}
+        >
+          {text.length}/{MAX_CAPTION_LENGTH}
+        </span>
+      </div>
 
       <button
         type="submit"

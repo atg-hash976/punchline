@@ -17,6 +17,7 @@ import { isWithinSubmissionWindow, formatComicDate } from "@/lib/timing";
 type Comic = { id: string; imageUrl: string; releaseAt: string; freezeAt: string };
 type SubmittedCaption = { username: string; city?: string; text: string };
 type Result = {
+  id: string;
   rank: number;
   winCount: number;
   matchCount: number;
@@ -58,6 +59,7 @@ export default function Home() {
   // eat into the caption clock — SubmitCaptionForm picks up from here.
   const [prefillUsername, setPrefillUsername] = useState("");
   const [prefillCity, setPrefillCity] = useState("");
+  const [streak, setStreak] = useState(0);
 
   useEffect(() => {
     fetch("/api/comic/today")
@@ -69,6 +71,7 @@ export default function Home() {
         setOpenedAt(d.openedAt ?? null);
         setUnlocked(Boolean(d.unlocked));
         setShowLanding(!d.openedAt && !d.unlocked);
+        setStreak(d.streak ?? 0);
 
         if (d.comic) {
           fetch(`/api/comic/results?comicId=${d.comic.id}`)
@@ -166,7 +169,12 @@ export default function Home() {
           }
         />
       ) : showLanding ? (
-        <LandingHero yesterday={yesterday} onPlay={handlePlayNow} onBrowse={handleBrowseFromLanding} />
+        <LandingHero
+          yesterday={yesterday}
+          streak={streak}
+          onPlay={handlePlayNow}
+          onBrowse={handleBrowseFromLanding}
+        />
       ) : (
         <>
           <ComicCard

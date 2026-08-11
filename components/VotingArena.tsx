@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Swords } from "lucide-react";
+import { Swords, Heart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import ReportButton from "./ReportButton";
 
 type Challenger = { id: string; username: string; city?: string | null; text: string };
@@ -12,6 +13,8 @@ type Props = {
   exitLabel?: string;
 };
 
+const DOTS_PER_SET = 5;
+
 export default function VotingArena({ comicId, onDone, exitLabel = "Done voting — browse captions" }: Props) {
   const [pair, setPair] = useState<Challenger[] | null>(null);
   const [round, setRound] = useState(1);
@@ -20,6 +23,11 @@ export default function VotingArena({ comicId, onDone, exitLabel = "Done voting 
   // The picked card holds a green "burst" for a beat before the loser gets
   // replaced — purely a feel/feedback delay, not tied to the actual request.
   const [winningId, setWinningId] = useState<string | null>(null);
+  // Ephemeral, this-visit-only tally — gives voters a small, achievable goal
+  // (fill 5 dots) rather than an open-ended "keep voting forever" ask. Once
+  // a set fills, it slides away and a fresh empty one takes its place.
+  const [votesCast, setVotesCast] = useState(0);
+  const [showThanks, setShowThanks] = useState(false);
 
   useEffect(() => {
     fetch(`/api/captions/matchup?comicId=${comicId}&count=2`)
@@ -43,6 +51,14 @@ export default function VotingArena({ comicId, onDone, exitLabel = "Done voting 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ comicId, winnerCaptionId: winner.id, loserCaptionId: loser.id }),
+      });
+
+      setVotesCast((v) => {
+        if (v === 0) {
+          setShowThanks(true);
+          setTimeout(() => setShowThanks(false), 2200);
+        }
+        return v + 1;
       });
 
       const excludeIds = pair.map((c) => c.id).join(",");
@@ -85,6 +101,8 @@ export default function VotingArena({ comicId, onDone, exitLabel = "Done voting 
   }
 
   const [a, b] = pair;
+  const setIndex = Math.floor(votesCast / DOTS_PER_SET);
+  const filledDots = votesCast % DOTS_PER_SET;
 
   return (
     <div className="space-y-3">
@@ -96,6 +114,45 @@ export default function VotingArena({ comicId, onDone, exitLabel = "Done voting 
         <h2 className="font-display text-xl font-bold text-ink">Help decide today's winner</h2>
         <p className="text-xs text-ink-muted">Tap the funnier caption</p>
       </header>
+
+      <div className="flex flex-col items-center gap-1.5">
+        <div className="relative w-full flex justify-center overflow-hidden py-1">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.div
+              key={setIndex}
+              initial={{ x: 48, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -48, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 380, damping: 32 }}
+              className="flex items-center gap-2"
+            >
+              {Array.from({ length: DOTS_PER_SET }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`w-2.5 h-2.5 rounded-full transition-colors duration-300 ${
+                    i < filledDots ? "bg-forest" : "bg-ink/10"
+                  }`}
+                />
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <AnimatePresence>
+          {showThanks && (
+            <motion.p
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.3 }}
+              className="flex items-center gap-1 text-[11px] font-medium text-forest-dark"
+            >
+              <Heart size={11} strokeWidth={2.5} fill="currentColor" />
+              Thank you for voting!
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </div>
 
       <div className="relative grid grid-cols-2 gap-3 items-stretch">
         {[a, b].map((c) => (

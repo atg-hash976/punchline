@@ -1,6 +1,6 @@
 "use client";
 
-import { Trophy, Sparkles, Eye } from "lucide-react";
+import { Trophy, Sparkles, Eye, Flame } from "lucide-react";
 import Link from "next/link";
 import { SUBMISSION_WINDOW_MINUTES } from "@/lib/timing";
 
@@ -19,13 +19,21 @@ type Yesterday = {
 
 type Props = {
   yesterday: Yesterday | null;
+  streak: number;
   onPlay: () => void;
   onBrowse: () => void;
 };
 
-export default function LandingHero({ yesterday, onPlay, onBrowse }: Props) {
+export default function LandingHero({ yesterday, streak, onPlay, onBrowse }: Props) {
   return (
     <div className="space-y-5">
+      {streak > 0 && (
+        <p className="flex items-center justify-center gap-1.5 font-mono text-xs font-semibold text-gold-dark">
+          <Flame size={14} strokeWidth={2.5} className="text-gold" />
+          {streak}-day streak — keep it alive!
+        </p>
+      )}
+
       <div className="bg-gradient-to-b from-forest-light to-card rounded-xl2 shadow-pop ring-2 ring-forest/30 p-6 text-center space-y-4">
         <p className="flex items-center justify-center gap-1.5 font-mono text-[11px] tracking-[0.15em] uppercase text-forest-dark">
           <span className="relative flex h-2 w-2">

@@ -50,6 +50,13 @@ export default {
           "0%, 100%": { boxShadow: "0 0 0 0 rgba(74,124,89,0.35)" },
           "50%": { boxShadow: "0 0 0 10px rgba(74,124,89,0)" },
         },
+        "alarm-shake": {
+          "0%, 100%": { transform: "translateX(0)" },
+          "20%": { transform: "translateX(-3px) rotate(-2deg)" },
+          "40%": { transform: "translateX(3px) rotate(2deg)" },
+          "60%": { transform: "translateX(-2px) rotate(-1deg)" },
+          "80%": { transform: "translateX(2px) rotate(1deg)" },
+        },
       },
       animation: {
         "slide-in-right": "slide-in-right 0.28s ease-out",
@@ -57,6 +64,7 @@ export default {
         "winner-burst": "winner-burst 0.5s ease-out",
         "confetti-fall": "confetti-fall 2.6s ease-in forwards",
         "invite-pulse": "invite-pulse 2.2s ease-in-out infinite",
+        "alarm-shake": "alarm-shake 0.4s ease-in-out 2",
       },
     },
   },

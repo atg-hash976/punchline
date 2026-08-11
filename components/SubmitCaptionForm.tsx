@@ -4,6 +4,8 @@ import { useState } from "react";
 import { User, MapPin, MessageSquareText, Lightbulb } from "lucide-react";
 import { SUBMISSION_WINDOW_MINUTES } from "@/lib/timing";
 
+const MAX_CAPTION_LENGTH = 250;
+
 type Props = {
   comicId: string;
   windowExpired: boolean;
@@ -101,10 +103,17 @@ export default function SubmitCaptionForm({
           onChange={(e) => setText(e.target.value)}
           placeholder="Your caption…"
           required
-          maxLength={250}
+          maxLength={MAX_CAPTION_LENGTH}
           rows={3}
           className="w-full text-sm font-mono text-blue-dark bg-card border-2 border-blue rounded-xl2 pl-10 pr-4 py-3 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/30 transition resize-none"
         />
+        <span
+          className={`absolute bottom-2 right-3 text-[10px] font-mono ${
+            MAX_CAPTION_LENGTH - text.length <= 20 ? "text-coral-dark font-semibold" : "text-ink-faint"
+          }`}
+        >
+          {text.length}/{MAX_CAPTION_LENGTH}
+        </span>
       </div>
       {error && <p className="text-coral-dark text-xs font-medium">{error}</p>}
       <div className="flex justify-between items-center pt-1">

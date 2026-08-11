@@ -31,6 +31,7 @@ export async function GET(req: NextRequest) {
   }
 
   const results = snapshots.map((s) => ({
+    id: s.captionId,
     rank: s.rank,
     winCount: s.winCount,
     matchCount: s.matchCount,

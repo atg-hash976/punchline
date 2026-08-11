@@ -9,6 +9,7 @@ import { dateLabelCT } from "@/lib/timezone";
 
 type Comic = { imageUrl: string; releaseAt: string; artistName?: string | null };
 type Result = {
+  id: string;
   rank: number;
   winCount: number;
   matchCount: number;
