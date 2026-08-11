@@ -8,6 +8,7 @@ import CountdownTimer from "@/components/CountdownTimer";
 import SubmitCaptionForm from "@/components/SubmitCaptionForm";
 import PreFillForm from "@/components/PreFillForm";
 import CaptionFeed from "@/components/CaptionFeed";
+import OwnCaptionCard from "@/components/OwnCaptionCard";
 import ShareModal from "@/components/ShareModal";
 import Confetti from "@/components/Confetti";
 import PunchlineLogo from "@/components/PunchlineLogo";
@@ -123,6 +124,9 @@ export default function Home() {
   }
 
   const windowExpired = openedAt ? !isWithinSubmissionWindow(new Date(openedAt), new Date(now)) : false;
+  // Lurkers only ever see black-and-white — the color version is the
+  // submission reward, so it's only used once this session has one.
+  const shareImageUrl = hasSubmittedCaption ? comic.colorImageUrl ?? comic.imageUrl : comic.imageUrl;
 
   async function handleForfeit() {
     await fetch("/api/comic/forfeit", {
@@ -266,12 +270,17 @@ export default function Home() {
               exitLabel={submitted ? undefined : "Just browse instead"}
             />
           ) : unlocked ? (
-            <CaptionFeed
-              comicId={comic.id}
-              votesCast={votesCast}
-              shareImageUrl={hasSubmittedCaption ? comic.colorImageUrl ?? comic.imageUrl : comic.imageUrl}
-              onStartVoting={() => setShowVoting(true)}
-            />
+            <>
+              {hasSubmittedCaption && (
+                <OwnCaptionCard comicId={comic.id} shareImageUrl={shareImageUrl} />
+              )}
+              <CaptionFeed
+                comicId={comic.id}
+                votesCast={votesCast}
+                shareImageUrl={shareImageUrl}
+                onStartVoting={() => setShowVoting(true)}
+              />
+            </>
           ) : null}
         </>
       )}
@@ -281,7 +290,7 @@ export default function Home() {
       {showShare && submitted && (
         <ShareModal
           caption={{ ...submitted, isYou: true }}
-          imageUrl={comic.colorImageUrl ?? comic.imageUrl}
+          imageUrl={shareImageUrl}
           celebrate={false}
           onClose={() => {
             setShowShare(false);
