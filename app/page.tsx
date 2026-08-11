@@ -80,6 +80,10 @@ export default function Home() {
   // wipe plays — the share card waits until that finishes instead of
   // popping up instantly and covering the very moment it's celebrating.
   const [celebrating, setCelebrating] = useState(false);
+  // Distinct from `comic === null` — that's also true for the split second
+  // before the initial fetch resolves, which would otherwise flash the
+  // genuine "no comic today" message even when one's actually loading.
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/comic/today")
@@ -100,7 +104,8 @@ export default function Home() {
             .then((r) => r.json())
             .then((rd) => setResults(rd.frozen ? rd.results : null));
         }
-      });
+      })
+      .finally(() => setLoading(false));
 
     fetch("/api/comic/archive")
       .then((r) => r.json())
@@ -111,6 +116,16 @@ export default function Home() {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
+
+  if (loading) {
+    return (
+      <main className="max-w-lg mx-auto p-6 pt-32 text-center">
+        <p className="font-mono text-xs tracking-widest uppercase text-ink-muted">
+          Daily Caption Contest
+        </p>
+      </main>
+    );
+  }
 
   if (!comic) {
     return (
@@ -259,7 +274,7 @@ export default function Home() {
                 className="w-full flex items-center justify-center gap-1.5 text-xs text-ink-muted underline decoration-ink-faint underline-offset-2 hover:text-ink transition"
               >
                 <Eye size={13} strokeWidth={2.25} />
-                Or, just browse and see what others have said today
+                Don't feel like playing today? Just browse and see what others have said today.
               </button>
             </>
           )}
