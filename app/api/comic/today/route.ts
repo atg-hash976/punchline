@@ -3,6 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { getOrCreateSessionId, hasForfeited } from "@/lib/session";
 import { computeStreak } from "@/lib/streak";
 
+// The "no comic yet" branch below returns before ever touching cookies(),
+// so Next.js's static-vs-dynamic detection can miss that this route needs
+// to be dynamic — and cache that early response forever (see the same fix
+// in /api/comic/archive). Force it explicitly so every request re-checks
+// the database instead of serving a stale answer once a comic goes live.
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const now = new Date();
 
