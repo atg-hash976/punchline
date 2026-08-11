@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Eye } from "lucide-react";
 import ComicCard, { COLOR_REVEAL_MS } from "@/components/ComicCard";
 import CountdownTimer from "@/components/CountdownTimer";
 import SubmitCaptionForm from "@/components/SubmitCaptionForm";
@@ -61,9 +60,15 @@ export default function Home() {
   const [showVoting, setShowVoting] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [results, setResults] = useState<Result[] | null>(null); // non-null once frozen
-  // The landing teaser only greets a genuinely fresh visitor — anyone who
-  // already opened/submitted/forfeited today resumes straight into the game.
-  const [showLanding, setShowLanding] = useState(false);
+  // Defaults true — a fresh visitor (the common case, e.g. arriving from a
+  // share link) sees the landing hero on first paint with no loading flash;
+  // this gets corrected the moment real server state comes back, for the
+  // rarer case of a same-day returning visitor resuming mid-game.
+  const [showLanding, setShowLanding] = useState(true);
+  // Starts false (optimistic, matches showLanding's default) — flips true
+  // only once the fetch actually confirms there's genuinely no comic today,
+  // as opposed to just not having loaded yet.
+  const [noComicYet, setNoComicYet] = useState(false);
   const [yesterday, setYesterday] = useState<Yesterday>(null);
   // Filled in before the comic is revealed, so typing your name doesn't
   // eat into the caption clock — SubmitCaptionForm picks up from here.
@@ -80,21 +85,18 @@ export default function Home() {
   // wipe plays — the share card waits until that finishes instead of
   // popping up instantly and covering the very moment it's celebrating.
   const [celebrating, setCelebrating] = useState(false);
-  // Distinct from `comic === null` — that's also true for the split second
-  // before the initial fetch resolves, which would otherwise flash the
-  // genuine "no comic today" message even when one's actually loading.
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/comic/today")
       .then((r) => r.json())
       .then((d) => {
         setComic(d.comic ?? null);
+        setNoComicYet(!d.comic);
         // Resume this session's real state (server-side truth) instead of
         // always starting from scratch on a page reload.
         setOpenedAt(d.openedAt ?? null);
         setUnlocked(Boolean(d.unlocked));
-        setShowLanding(!d.openedAt && !d.unlocked);
+        setShowLanding(Boolean(d.comic) && !d.openedAt && !d.unlocked);
         setStreak(d.streak ?? 0);
         setVotesCast(d.votesCast ?? 0);
         setHasSubmittedCaption(Boolean(d.hasSubmitted));
@@ -104,8 +106,7 @@ export default function Home() {
             .then((r) => r.json())
             .then((rd) => setResults(rd.frozen ? rd.results : null));
         }
-      })
-      .finally(() => setLoading(false));
+      });
 
     fetch("/api/comic/archive")
       .then((r) => r.json())
@@ -117,38 +118,21 @@ export default function Home() {
     return () => clearInterval(t);
   }, []);
 
-  if (loading) {
-    return (
-      <main className="max-w-lg mx-auto p-6 pt-32 text-center">
-        <p className="font-mono text-xs tracking-widest uppercase text-ink-muted">
-          Daily Caption Contest
-        </p>
-      </main>
-    );
-  }
-
-  if (!comic) {
-    return (
-      <main className="max-w-lg mx-auto p-6 pt-32 text-center">
-        <p className="font-mono text-xs tracking-widest uppercase text-ink-muted">
-          Daily Caption Contest
-        </p>
-        <p className="mt-3 text-ink-muted">No comic available yet — check back at 10am CT!</p>
-      </main>
-    );
-  }
-
   const windowExpired = openedAt ? !isWithinSubmissionWindow(new Date(openedAt), new Date(now)) : false;
   // Lurkers only ever see black-and-white — the color version is the
   // submission reward, so it's only used once this session has one.
-  const shareImageUrl = hasSubmittedCaption ? comic.colorImageUrl ?? comic.imageUrl : comic.imageUrl;
-  const comicDate = formatComicDate(new Date(comic.releaseAt));
+  // Both fall back safely for the brief window before the initial fetch
+  // resolves (comic is still null then, since the landing hero — the
+  // default view — doesn't need either of these).
+  const shareImageUrl = comic ? (hasSubmittedCaption ? comic.colorImageUrl ?? comic.imageUrl : comic.imageUrl) : "";
+  const comicDate = comic ? formatComicDate(new Date(comic.releaseAt)) : "";
 
   async function handleForfeit() {
+    if (!comic) return;
     await fetch("/api/comic/forfeit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ comicId: comic!.id }),
+      body: JSON.stringify({ comicId: comic.id }),
     });
     setUnlocked(true);
   }
@@ -167,6 +151,7 @@ export default function Home() {
   }
 
   function handlePlayNow() {
+    if (!comic) return;
     setShowLanding(false);
   }
 
@@ -181,13 +166,14 @@ export default function Home() {
   }
 
   async function handleBrowseFromLanding() {
+    if (!comic) return;
     // Reveal the comic (so there's something to browse captions *about*) but
     // forfeit in the same breath, so the submit form never appears — this is
     // an explicit "I don't want to play" choice, same as the in-game one.
     const res = await fetch("/api/comic/open", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ comicId: comic!.id }),
+      body: JSON.stringify({ comicId: comic.id }),
     });
     const data = await res.json();
     setOpenedAt(data.openedAt);
@@ -204,7 +190,7 @@ export default function Home() {
         <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-blue-dark">
           Daily Caption Contest
         </p>
-        <p className="font-mono text-[11px] text-ink-faint">{formatComicDate(new Date(comic.releaseAt))}</p>
+        {comic && <p className="font-mono text-[11px] text-ink-faint">{comicDate}</p>}
         <h1 className="font-display text-3xl font-bold">
           <PunchlineLogo />
           <sup className="ml-1 align-super font-mono text-[11px] font-normal text-ink-faint">BETA</sup>
@@ -219,7 +205,7 @@ export default function Home() {
         )}
       </header>
 
-      {results ? (
+      {results && comic ? (
         <ResultsReveal
           imageUrl={comic.imageUrl}
           results={results}
@@ -229,6 +215,8 @@ export default function Home() {
             </p>
           }
         />
+      ) : noComicYet ? (
+        <p className="text-center text-ink-muted mt-3">No comic available yet — check back at 10am CT!</p>
       ) : showLanding ? (
         <LandingHero
           yesterday={yesterday}
@@ -236,7 +224,7 @@ export default function Home() {
           onPlay={handlePlayNow}
           onBrowse={handleBrowseFromLanding}
         />
-      ) : (
+      ) : comic ? (
         <>
           <ComicCard
             comicId={comic.id}
@@ -273,7 +261,6 @@ export default function Home() {
                 onClick={handleBrowseFromLanding}
                 className="w-full flex items-center justify-center gap-1.5 text-xs text-ink-muted underline decoration-ink-faint underline-offset-2 hover:text-ink transition"
               >
-                <Eye size={13} strokeWidth={2.25} />
                 Don't feel like playing today? Just browse and see what others have said today.
               </button>
             </>
@@ -301,7 +288,7 @@ export default function Home() {
             </>
           ) : null}
         </>
-      )}
+      ) : null}
 
       {celebrating && <Confetti />}
 

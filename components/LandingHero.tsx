@@ -1,6 +1,6 @@
 "use client";
 
-import { Trophy, Sparkles, Eye, Flame } from "lucide-react";
+import { Trophy, Sparkles, Flame } from "lucide-react";
 import Link from "next/link";
 import { SUBMISSION_WINDOW_MINUTES } from "@/lib/timing";
 
@@ -45,7 +45,8 @@ export default function LandingHero({ yesterday, streak, onPlay, onBrowse }: Pro
 
         <p className="text-ink leading-snug">
           One comic. One caption.{" "}
-          <span className="font-semibold">{SUBMISSION_WINDOW_MINUTES} minutes</span> to play.{" "}
+          <span className="font-semibold">{SUBMISSION_WINDOW_MINUTES} minutes</span> to play.
+          <br />
           <span className="font-bold">Today's challenge is waiting.</span>
         </p>
 
@@ -61,7 +62,6 @@ export default function LandingHero({ yesterday, streak, onPlay, onBrowse }: Pro
           onClick={onBrowse}
           className="w-full flex items-center justify-center gap-1.5 text-xs text-ink-muted underline decoration-ink-faint underline-offset-2 hover:text-ink transition"
         >
-          <Eye size={13} strokeWidth={2.25} />
           Don't feel like playing today? Just browse and see what others have said today.
         </button>
       </div>
