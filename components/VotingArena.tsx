@@ -39,14 +39,24 @@ export default function VotingArena({
   const [hasVotedThisVisit, setHasVotedThisVisit] = useState(false);
   const [finished, setFinished] = useState(false);
   const alreadyDone = initialVotesCast >= MAX_VOTES;
+  // Every caption shown so far this visit — not just the current pair.
+  // Without this, a small caption pool (typical right after a comic goes
+  // live) makes the same couple of captions cycle back within a session,
+  // since excluding only the on-screen pair doesn't remember who the
+  // judge already saw a round or two ago.
+  const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (alreadyDone) return;
     fetch(`/api/captions/matchup?comicId=${comicId}&count=2`)
       .then((r) => r.json())
       .then((data) => {
-        if ((data.captions ?? []).length < 2) setUnavailable(true);
-        else setPair(data.captions);
+        const captions = data.captions ?? [];
+        if (captions.length < 2) setUnavailable(true);
+        else {
+          setPair(captions);
+          setSeenIds(new Set(captions.map((c: Challenger) => c.id)));
+        }
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -59,6 +69,14 @@ export default function VotingArena({
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished]);
+
+  async function fetchChallenger(excludeIds: string[]): Promise<Challenger | undefined> {
+    const res = await fetch(
+      `/api/captions/matchup?comicId=${comicId}&excludeIds=${excludeIds.join(",")}&count=1`
+    );
+    const data = await res.json();
+    return (data.captions ?? [])[0];
+  }
 
   async function handlePick(winner: Challenger, loser: Challenger) {
     if (voting || !pair) return;
@@ -87,18 +105,23 @@ export default function VotingArena({
         return;
       }
 
-      const excludeIds = pair.map((c) => c.id).join(",");
-      const res = await fetch(
-        `/api/captions/matchup?comicId=${comicId}&excludeIds=${excludeIds}&count=1`
-      );
-      const data = await res.json();
-      const replacement: Challenger | undefined = (data.captions ?? [])[0];
+      // Prefer a genuinely fresh face — excludes everyone shown this visit,
+      // not just the current pair. Only if that pool is exhausted (a small
+      // comic-just-went-live count of captions) do we fall back to allowing
+      // a repeat from earlier this session, keeping only the current pair
+      // off the table so the same two never face off twice in a row.
+      let replacement = await fetchChallenger(Array.from(seenIds));
+      if (!replacement) {
+        replacement = await fetchChallenger(pair.map((c) => c.id));
+      }
 
       if (!replacement) {
         setUnavailable(true);
         return;
       }
-      setPair((prev) => prev!.map((c) => (c.id === loser.id ? replacement : c)));
+      const nextReplacement = replacement;
+      setSeenIds((prev) => new Set(prev).add(nextReplacement.id));
+      setPair((prev) => prev!.map((c) => (c.id === loser.id ? nextReplacement : c)));
       setRound((r) => r + 1);
     } finally {
       setVoting(false);
