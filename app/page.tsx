@@ -269,6 +269,7 @@ export default function Home() {
             <CaptionFeed
               comicId={comic.id}
               votesCast={votesCast}
+              shareImageUrl={hasSubmittedCaption ? comic.colorImageUrl ?? comic.imageUrl : comic.imageUrl}
               onStartVoting={() => setShowVoting(true)}
             />
           ) : null}
@@ -279,7 +280,7 @@ export default function Home() {
 
       {showShare && submitted && (
         <ShareModal
-          caption={submitted}
+          caption={{ ...submitted, isYou: true }}
           imageUrl={comic.colorImageUrl ?? comic.imageUrl}
           celebrate={false}
           onClose={() => {

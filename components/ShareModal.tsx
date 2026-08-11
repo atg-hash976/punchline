@@ -6,7 +6,7 @@ import Confetti from "./Confetti";
 import { generateShareCard } from "@/lib/shareCard";
 
 type Props = {
-  caption: { text: string };
+  caption: { username: string; city?: string | null; text: string; isYou?: boolean };
   imageUrl: string;
   onClose: () => void;
   heading?: string;
@@ -32,7 +32,13 @@ export default function ShareModal({
     let cancelled = false;
     let objectUrl: string | null = null;
 
-    generateShareCard({ imageUrl, text: caption.text })
+    generateShareCard({
+      imageUrl,
+      text: caption.text,
+      username: caption.username,
+      city: caption.city,
+      isYou: caption.isYou,
+    })
       .then((blob) => {
         if (cancelled) return;
         objectUrl = URL.createObjectURL(blob);
@@ -62,7 +68,7 @@ export default function ShareModal({
         await navigator.share({
           files: [file],
           title: "Punchline",
-          text: `"${caption.text}"`,
+          text: `"${caption.text}" — ${caption.username}${caption.city ? ` (${caption.city})` : ""}`,
         });
       } catch {
         /* user cancelled the share sheet — no-op */

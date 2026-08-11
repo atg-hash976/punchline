@@ -13,10 +13,12 @@ import {
   Swords,
   CheckCircle2,
   Heart,
+  Share2,
 } from "lucide-react";
 import Leaderboard, { LeaderboardEntry } from "./Leaderboard";
 import ReportButton from "./ReportButton";
 import HeartButton from "./HeartButton";
+import ShareModal from "./ShareModal";
 import { MAX_VOTES_PER_DAY } from "@/lib/ranking";
 
 type Caption = {
@@ -85,16 +87,21 @@ const TAB_ORDER: Tab[] = TABS.map((t) => t.id);
 export default function CaptionFeed({
   comicId,
   votesCast,
+  shareImageUrl,
   onStartVoting,
 }: {
   comicId: string;
   votesCast: number;
+  shareImageUrl: string;
   onStartVoting: () => void;
 }) {
   const [tab, setTab] = useState<Tab>("rising");
   const [captions, setCaptions] = useState<Caption[]>([]);
   const [locked, setLocked] = useState(true);
   const [index, setIndex] = useState(0);
+  // Anyone can share any visible caption, not just their own — this just
+  // tracks which one (if any) currently has the share modal open.
+  const [sharingCaption, setSharingCaption] = useState<Caption | null>(null);
   // Which way the content should slide in — based on tab order, not clicks,
   // so it reads consistently regardless of how you got there.
   const [slideDir, setSlideDir] = useState<"right" | "left">("right");
@@ -255,6 +262,14 @@ export default function CaptionFeed({
                   initialHearted={captions[index].isHearted}
                   initialCount={captions[index].heartCount}
                 />
+                <button
+                  onClick={() => setSharingCaption(captions[index])}
+                  className="inline-flex items-center gap-1 text-xs text-ink-faint hover:text-blue transition"
+                  aria-label="Share this caption"
+                  title="Share this caption"
+                >
+                  <Share2 size={13} strokeWidth={2.25} />
+                </button>
                 {!captions[index].isYou && (
                   <ReportButton key={`report-${captions[index].id}`} captionId={captions[index].id} />
                 )}
@@ -277,6 +292,17 @@ export default function CaptionFeed({
         </>
       )}
       </div>
+
+      {sharingCaption && (
+        <ShareModal
+          caption={sharingCaption}
+          imageUrl={shareImageUrl}
+          heading="Share this caption"
+          subheading={sharingCaption.isYou ? "Show it off!" : "Pass along the laugh"}
+          celebrate={false}
+          onClose={() => setSharingCaption(null)}
+        />
+      )}
     </div>
   );
 }
