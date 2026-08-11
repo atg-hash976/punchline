@@ -32,6 +32,9 @@ export async function GET() {
     comic,
     openedAt: open?.openedAt ?? null,
     unlocked: Boolean(ownCaption) || hasForfeited(comic.id),
+    // Distinct from `unlocked`: forfeiting also unlocks the feed, but only
+    // an actual submission reveals the color version (see ComicCard).
+    hasSubmitted: Boolean(ownCaption),
     streak,
     votesCast,
   });

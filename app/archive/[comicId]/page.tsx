@@ -18,6 +18,7 @@ type Result = {
   city?: string | null;
   text: string;
   isYou: boolean;
+  heartCount: number;
 };
 type PracticeCaption = { username: string; city?: string; text: string };
 

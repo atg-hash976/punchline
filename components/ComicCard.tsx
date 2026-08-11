@@ -8,16 +8,35 @@ import { SUBMISSION_WINDOW_MINUTES } from "@/lib/timing";
 type Props = {
   comicId: string;
   imageUrl: string;
+  colorImageUrl?: string | null;
+  showColor: boolean;
   initialOpenedAt?: string | null;
   onOpened: (openedAt: string) => void;
 };
 
-export default function ComicCard({ comicId, imageUrl, initialOpenedAt, onOpened }: Props) {
+// Exported so callers (e.g. the submit flow deciding when to show the share
+// card) can wait for this exact animation to finish instead of guessing.
+export const COLOR_REVEAL_MS = 1600;
+
+const SWEEP_TRANSITION = { duration: COLOR_REVEAL_MS / 1000, ease: [0.65, 0, 0.35, 1] as const };
+
+export default function ComicCard({
+  comicId,
+  imageUrl,
+  colorImageUrl,
+  showColor,
+  initialOpenedAt,
+  onOpened,
+}: Props) {
   const [revealed, setRevealed] = useState(Boolean(initialOpenedAt));
   const [loading, setLoading] = useState(false);
   // A one-shot flash overlay for the moment of reveal — self-clears once its
   // exit animation finishes, so it never lingers or replays on re-renders.
   const [flashing, setFlashing] = useState(false);
+  // Captured once at mount: if the comic was ALREADY color (a reload after
+  // an earlier submission), skip the wipe entirely and just show it — the
+  // animated sweep is reserved for the actual moment of submitting.
+  const [wasAlreadyColor] = useState(showColor);
 
   async function handleReveal() {
     setLoading(true);
@@ -43,6 +62,38 @@ export default function ComicCard({ comicId, imageUrl, initialOpenedAt, onOpened
         alt="Today's comic"
         className={`w-full transition-all duration-700 ease-out ${revealed ? "" : "blur-2xl scale-105"}`}
       />
+
+      {colorImageUrl && showColor && (
+        wasAlreadyColor ? (
+          <img src={colorImageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <>
+            {/* The color reveal itself — a clean left-to-right wipe, the
+                app's signature moment for actually submitting a caption. */}
+            <motion.div
+              className="absolute inset-0"
+              initial={{ clipPath: "inset(0 100% 0 0)" }}
+              animate={{ clipPath: "inset(0 0% 0 0)" }}
+              transition={SWEEP_TRANSITION}
+            >
+              <img src={colorImageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            </motion.div>
+            {/* A soft brand-palette sheen sweeping in lockstep with the wipe. */}
+            <motion.div
+              className="absolute inset-y-0 w-1/3 pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(105deg, transparent, rgba(74,128,214,0.55), rgba(74,124,89,0.55), rgba(201,154,59,0.55), rgba(196,91,74,0.55), transparent)",
+                mixBlendMode: "overlay",
+                filter: "blur(10px)",
+              }}
+              initial={{ left: "-40%" }}
+              animate={{ left: "105%" }}
+              transition={SWEEP_TRANSITION}
+            />
+          </>
+        )
+      )}
 
       <AnimatePresence>
         {!revealed && (

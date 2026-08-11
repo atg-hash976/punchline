@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
 
   const form = await req.formData();
   const image = form.get("image");
+  const colorImage = form.get("colorImage");
   const artistName = (form.get("artistName") as string | null)?.trim() || null;
   const releaseDate = form.get("releaseDate") as string | null;
   const releaseTime = form.get("releaseTime") as string | null;
@@ -49,6 +50,15 @@ export async function POST(req: NextRequest) {
   if (image.size > MAX_IMAGE_BYTES) {
     return NextResponse.json({ error: "Image must be under 8MB" }, { status: 400 });
   }
+  const hasColorImage = colorImage instanceof File && colorImage.size > 0;
+  if (hasColorImage) {
+    if (!(colorImage as File).type.startsWith("image/")) {
+      return NextResponse.json({ error: "Color image file must be an image" }, { status: 400 });
+    }
+    if ((colorImage as File).size > MAX_IMAGE_BYTES) {
+      return NextResponse.json({ error: "Color image must be under 8MB" }, { status: 400 });
+    }
+  }
   if (!releaseDate || !releaseTime || !freezeDate || !freezeTime) {
     return NextResponse.json(
       { error: "releaseDate, releaseTime, freezeDate, and freezeTime are all required" },
@@ -63,10 +73,12 @@ export async function POST(req: NextRequest) {
   }
 
   const imageUrl = await storeComicImage(image);
+  const colorImageUrl = hasColorImage ? await storeComicImage(colorImage as File) : null;
 
   const comic = await prisma.comic.create({
     data: {
       imageUrl,
+      colorImageUrl,
       artistName,
       releaseAt,
       freezeAt,

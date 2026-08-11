@@ -3,18 +3,26 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Eye } from "lucide-react";
-import ComicCard from "@/components/ComicCard";
+import ComicCard, { COLOR_REVEAL_MS } from "@/components/ComicCard";
 import CountdownTimer from "@/components/CountdownTimer";
 import SubmitCaptionForm from "@/components/SubmitCaptionForm";
 import PreFillForm from "@/components/PreFillForm";
 import CaptionFeed from "@/components/CaptionFeed";
 import ShareModal from "@/components/ShareModal";
+import Confetti from "@/components/Confetti";
+import PunchlineLogo from "@/components/PunchlineLogo";
 import VotingArena from "@/components/VotingArena";
 import ResultsReveal from "@/components/ResultsReveal";
 import LandingHero from "@/components/LandingHero";
 import { isWithinSubmissionWindow, formatComicDate } from "@/lib/timing";
 
-type Comic = { id: string; imageUrl: string; releaseAt: string; freezeAt: string };
+type Comic = {
+  id: string;
+  imageUrl: string;
+  colorImageUrl: string | null;
+  releaseAt: string;
+  freezeAt: string;
+};
 type SubmittedCaption = { username: string; city?: string; text: string };
 type Result = {
   id: string;
@@ -26,6 +34,7 @@ type Result = {
   city?: string | null;
   text: string;
   isYou: boolean;
+  heartCount: number;
 };
 type Yesterday = {
   id: string;
@@ -63,6 +72,13 @@ export default function Home() {
   // How many matchups this session has judged today — server-truth, so it
   // survives leaving and re-entering the voting arena (or reloading).
   const [votesCast, setVotesCast] = useState(0);
+  // Distinct from `unlocked` — forfeiting also unlocks the feed, but only an
+  // actual submission reveals the comic's color version.
+  const [hasSubmittedCaption, setHasSubmittedCaption] = useState(false);
+  // True for the moment right after submitting, while the comic's color
+  // wipe plays — the share card waits until that finishes instead of
+  // popping up instantly and covering the very moment it's celebrating.
+  const [celebrating, setCelebrating] = useState(false);
 
   useEffect(() => {
     fetch("/api/comic/today")
@@ -76,6 +92,7 @@ export default function Home() {
         setShowLanding(!d.openedAt && !d.unlocked);
         setStreak(d.streak ?? 0);
         setVotesCast(d.votesCast ?? 0);
+        setHasSubmittedCaption(Boolean(d.hasSubmitted));
 
         if (d.comic) {
           fetch(`/api/comic/results?comicId=${d.comic.id}`)
@@ -119,7 +136,14 @@ export default function Home() {
   function handleSubmitted(caption: SubmittedCaption) {
     setSubmitted(caption);
     setUnlocked(true);
-    setShowShare(true);
+    setHasSubmittedCaption(true); // triggers ComicCard's color wipe now
+    setCelebrating(true);
+    // Let the wipe + confetti actually play before the share card covers
+    // the screen — a little past COLOR_REVEAL_MS so the sweep visibly finishes.
+    setTimeout(() => {
+      setCelebrating(false);
+      setShowShare(true);
+    }, COLOR_REVEAL_MS + 300);
   }
 
   function handlePlayNow() {
@@ -161,7 +185,9 @@ export default function Home() {
           Daily Caption Contest
         </p>
         <p className="font-mono text-[11px] text-ink-faint">{formatComicDate(new Date(comic.releaseAt))}</p>
-        <h1 className="font-display text-3xl font-bold text-ink">Punchline</h1>
+        <h1 className="font-display text-3xl font-bold">
+          <PunchlineLogo />
+        </h1>
         {!showLanding && (
           <Link
             href="/archive"
@@ -194,6 +220,8 @@ export default function Home() {
           <ComicCard
             comicId={comic.id}
             imageUrl={comic.imageUrl}
+            colorImageUrl={comic.colorImageUrl}
+            showColor={hasSubmittedCaption}
             initialOpenedAt={openedAt}
             onOpened={setOpenedAt}
           />
@@ -247,10 +275,13 @@ export default function Home() {
         </>
       )}
 
+      {celebrating && <Confetti />}
+
       {showShare && submitted && (
         <ShareModal
           caption={submitted}
-          imageUrl={comic.imageUrl}
+          imageUrl={comic.colorImageUrl ?? comic.imageUrl}
+          celebrate={false}
           onClose={() => {
             setShowShare(false);
             setShowVoting(true);

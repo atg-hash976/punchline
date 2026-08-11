@@ -7,6 +7,7 @@ import ComicUploadForm from "./ComicUploadForm";
 type Comic = {
   id: string;
   imageUrl: string;
+  colorImageUrl: string | null;
   artistName: string | null;
   releaseAt: string;
   freezeAt: string;
@@ -152,6 +153,11 @@ export default function AdminDashboard() {
                       </span>
                       {comic.artistName && (
                         <span className="text-neutral-500 truncate">by {comic.artistName}</span>
+                      )}
+                      {comic.colorImageUrl && (
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                          🎨 color ready
+                        </span>
                       )}
                     </div>
                     <div className="text-neutral-600 mt-1">

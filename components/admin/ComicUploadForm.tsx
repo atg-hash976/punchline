@@ -44,8 +44,15 @@ export default function ComicUploadForm({ onCreated }: Props) {
       <h2 className="font-semibold text-lg">Schedule a comic</h2>
 
       <div>
-        <label className="block text-sm text-neutral-600 mb-1">Comic image</label>
+        <label className="block text-sm text-neutral-600 mb-1">Comic image (black &amp; white)</label>
         <input type="file" name="image" accept="image/*" required className="w-full" />
+      </div>
+
+      <div>
+        <label className="block text-sm text-neutral-600 mb-1">
+          Color version (optional — revealed to players once they submit a caption)
+        </label>
+        <input type="file" name="colorImage" accept="image/*" className="w-full" />
       </div>
 
       <div>

@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   const snapshots = await prisma.leaderboardSnapshot.findMany({
     where: { comicId },
     orderBy: { rank: "asc" },
-    include: { caption: true },
+    include: { caption: { include: { _count: { select: { hearts: true } } } } },
   });
 
   if (snapshots.length === 0) {
@@ -40,6 +40,7 @@ export async function GET(req: NextRequest) {
     city: s.caption.city,
     text: s.caption.text,
     isYou: s.caption.sessionId === sessionId,
+    heartCount: s.caption._count.hearts,
   }));
 
   return NextResponse.json({ frozen: true, comic, results });

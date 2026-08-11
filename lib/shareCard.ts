@@ -16,6 +16,10 @@ const PAD = 56;
 const CAPTION_FONT = "italic 500 40px Georgia, serif";
 const CAPTION_LINE_HEIGHT = 52;
 const BRAND_FONT = "700 30px Georgia, serif";
+// Same four brand accents as the in-app wordmark (components/PunchlineLogo),
+// starting on red — kept in sync here since canvas text can't share a
+// component with the DOM.
+const LOGO_COLORS = ["#C45B4A", "#4A7C59", "#C99A3B", "#4A80D6"];
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -42,6 +46,19 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
   }
   if (line) lines.push(line);
   return lines;
+}
+
+function drawLogo(ctx: CanvasRenderingContext2D, centerX: number, y: number) {
+  const text = "Punchline";
+  ctx.font = BRAND_FONT;
+  ctx.textAlign = "left";
+  let x = centerX - ctx.measureText(text).width / 2;
+  for (let i = 0; i < text.length; i++) {
+    ctx.fillStyle = LOGO_COLORS[i % LOGO_COLORS.length];
+    ctx.fillText(text[i], x, y);
+    x += ctx.measureText(text[i]).width;
+  }
+  ctx.textAlign = "center";
 }
 
 export async function generateShareCard(input: ShareCardInput): Promise<Blob> {
@@ -80,9 +97,7 @@ export async function generateShareCard(input: ShareCardInput): Promise<Blob> {
     y += CAPTION_LINE_HEIGHT;
   }
 
-  ctx.font = BRAND_FONT;
-  ctx.fillStyle = "#3A3632";
-  ctx.fillText("Punchline", CARD_WIDTH / 2, canvas.height - PAD + 20);
+  drawLogo(ctx, CARD_WIDTH / 2, canvas.height - PAD + 20);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Failed to render share card"))), "image/png");

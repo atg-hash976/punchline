@@ -14,6 +14,7 @@ generator client {
 model Comic {
   id            String   @id @default(cuid())
   imageUrl      String
+  colorImageUrl String? // revealed to a session only after it submits a caption — see ComicCard
   artistName    String? // null/empty = AI-generated, filled in once you commission illustrators
   releaseAt     DateTime // e.g. 10:00 AM CT daily
   freezeAt      DateTime // e.g. midnight CT same day — leaderboard locks here
@@ -56,6 +57,7 @@ model Caption {
   matchupsLost   Matchup[] @relation("MatchupLoser")
   snapshots      LeaderboardSnapshot[]
   reports        Report[]
+  hearts         Heart[]
 
   @@index([comicId])
   @@index([comicId, normalizedText]) // fast duplicate lookups
@@ -108,6 +110,21 @@ model Report {
   captionId String
   caption   Caption  @relation(fields: [captionId], references: [id])
   sessionId String   // anon cookie id of the reporter
+  createdAt DateTime @default(now())
+
+  @@unique([captionId, sessionId])
+  @@index([captionId])
+}
+
+// A lightweight "like" — purely a social signal, entirely separate from
+// head-to-head voting (Matchup) and never factored into ranking. Same
+// no-unlock-gate, one-per-(caption,session) shape as Report, and just as
+// toggleable (heart again to undo).
+model Heart {
+  id        String   @id @default(cuid())
+  captionId String
+  caption   Caption  @relation(fields: [captionId], references: [id])
+  sessionId String   // anon cookie id of whoever hearted it
   createdAt DateTime @default(now())
 
   @@unique([captionId, sessionId])

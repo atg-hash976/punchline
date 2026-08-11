@@ -1,6 +1,6 @@
 "use client";
 
-import { Trophy } from "lucide-react";
+import { Trophy, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export type LeaderboardEntry = {
@@ -13,6 +13,7 @@ export type LeaderboardEntry = {
   city?: string | null;
   text: string;
   isYou: boolean;
+  heartCount: number;
 };
 
 const SPRING = { type: "spring" as const, stiffness: 380, damping: 32 };
@@ -22,6 +23,48 @@ function YouBadge() {
     <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-blue-light text-blue-dark text-[10px] font-semibold align-middle">
       YOU
     </span>
+  );
+}
+
+/**
+ * Win-loss, win rate, and heart count as one dot-separated line — same
+ * font/size throughout so nothing reads as an afterthought bolted on.
+ */
+function StatsLine({
+  winCount,
+  matchCount,
+  winRate,
+  heartCount,
+  showWinRateLabel = false,
+  size = "text-xs",
+  center = true,
+  className = "",
+}: {
+  winCount: number;
+  matchCount: number;
+  winRate: number;
+  heartCount: number;
+  showWinRateLabel?: boolean;
+  size?: string;
+  center?: boolean;
+  className?: string;
+}) {
+  return (
+    <p
+      className={`flex items-center gap-1 font-mono ${size} text-ink-faint ${center ? "justify-center" : ""} ${className}`}
+    >
+      <span>
+        {winCount}-{matchCount - winCount} · {Math.round(winRate * 100)}%
+        {showWinRateLabel ? " win rate" : ""}
+      </span>
+      {heartCount > 0 && (
+        <span className="flex items-center gap-1 text-coral">
+          <span className="text-ink-faint">·</span>
+          <Heart size={11} strokeWidth={2.5} fill="currentColor" />
+          {heartCount}
+        </span>
+      )}
+    </p>
   );
 }
 
@@ -62,10 +105,13 @@ export default function Leaderboard({ results }: { results: LeaderboardEntry[] }
               {first.city ? `, ${first.city}` : ""}
               {first.isYou && <YouBadge />}
             </p>
-            <p className="font-mono text-xs text-ink-faint">
-              {first.winCount}-{first.matchCount - first.winCount} · {Math.round(first.winRate * 100)}%
-              win rate
-            </p>
+            <StatsLine
+              winCount={first.winCount}
+              matchCount={first.matchCount}
+              winRate={first.winRate}
+              heartCount={first.heartCount}
+              showWinRateLabel
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -96,8 +142,15 @@ export default function Leaderboard({ results }: { results: LeaderboardEntry[] }
                     <p className="text-xs font-mono text-ink-muted">
                       — {r.username}
                       {r.city ? `, ${r.city}` : ""}
+                      {r.isYou && <YouBadge />}
                     </p>
-                    {r.isYou && <YouBadge />}
+                    <StatsLine
+                      winCount={r.winCount}
+                      matchCount={r.matchCount}
+                      winRate={r.winRate}
+                      heartCount={r.heartCount}
+                      size="text-[11px]"
+                    />
                   </motion.div>
                 )
             )}
@@ -116,22 +169,27 @@ export default function Leaderboard({ results }: { results: LeaderboardEntry[] }
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={SPRING}
-                className="flex items-center gap-3 p-3"
+                className="flex items-start gap-3 p-3"
               >
-                <span className="font-mono text-xs text-ink-faint w-5 text-center shrink-0">
+                <span className="font-mono text-xs text-ink-faint w-5 text-center shrink-0 pt-0.5">
                   {r.rank}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-ink truncate">"{r.text}"</p>
-                  <p className="text-xs font-mono text-ink-muted truncate">
+                  <p className="text-sm text-ink">"{r.text}"</p>
+                  <p className="text-xs font-mono text-ink-muted">
                     — {r.username}
                     {r.city ? `, ${r.city}` : ""}
                     {r.isYou && <span className="ml-1.5 text-blue-dark font-semibold">· YOU</span>}
                   </p>
                 </div>
-                <span className="font-mono text-xs text-ink-faint shrink-0">
-                  {Math.round(r.winRate * 100)}%
-                </span>
+                <StatsLine
+                  winCount={r.winCount}
+                  matchCount={r.matchCount}
+                  winRate={r.winRate}
+                  heartCount={r.heartCount}
+                  center={false}
+                  className="shrink-0 pt-0.5"
+                />
               </motion.div>
             ))}
           </AnimatePresence>

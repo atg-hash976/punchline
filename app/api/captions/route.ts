@@ -34,7 +34,12 @@ export async function GET(req: NextRequest) {
 
   const captions = await prisma.caption.findMany({
     where: { comicId, withinWindow: true },
-    include: { matchupsWon: true, matchupsLost: true },
+    include: {
+      matchupsWon: true,
+      matchupsLost: true,
+      hearts: { where: { sessionId }, select: { id: true } },
+      _count: { select: { hearts: true } },
+    },
   });
 
   const shaped = captions.map((c) => {
@@ -51,6 +56,8 @@ export async function GET(req: NextRequest) {
       matches,
       winRate: matches > 0 ? wins / matches : 0,
       isYou: c.sessionId === sessionId,
+      heartCount: c._count.hearts,
+      isHearted: c.hearts.length > 0,
     };
   });
 

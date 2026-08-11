@@ -12,9 +12,11 @@ import {
   PenLine,
   Swords,
   CheckCircle2,
+  Heart,
 } from "lucide-react";
 import Leaderboard, { LeaderboardEntry } from "./Leaderboard";
 import ReportButton from "./ReportButton";
+import HeartButton from "./HeartButton";
 import { MAX_VOTES_PER_DAY } from "@/lib/ranking";
 
 type Caption = {
@@ -26,6 +28,8 @@ type Caption = {
   matches: number;
   winRate: number;
   isYou: boolean;
+  heartCount: number;
+  isHearted: boolean;
 };
 
 type Tab = "rising" | "new" | "top" | "leaderboard";
@@ -147,6 +151,7 @@ export default function CaptionFeed({
     city: c.city,
     text: c.text,
     isYou: c.isYou,
+    heartCount: c.heartCount,
   }));
 
   return (
@@ -224,16 +229,36 @@ export default function CaptionFeed({
                 {captions[index].city ? `, ${captions[index].city}` : ""}
               </p>
               {tab === "top" && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold-light text-gold-dark font-mono text-xs font-medium">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold-light text-gold-dark font-mono text-xs font-medium">
                   <Trophy size={12} strokeWidth={2.5} />
-                  {captions[index].matches > 0
-                    ? `${Math.round(captions[index].winRate * 100)}% win rate`
-                    : "No matchups yet"}
-                </span>
+                  {captions[index].matches > 0 ? (
+                    <span>
+                      {captions[index].wins}-{captions[index].matches - captions[index].wins} ·{" "}
+                      {Math.round(captions[index].winRate * 100)}% win rate
+                    </span>
+                  ) : (
+                    <span>No matchups yet</span>
+                  )}
+                  {captions[index].heartCount > 0 && (
+                    <span className="flex items-center gap-1 text-coral">
+                      <span className="text-gold-dark/40">·</span>
+                      <Heart size={11} strokeWidth={2.5} fill="currentColor" />
+                      {captions[index].heartCount}
+                    </span>
+                  )}
+                </div>
               )}
-              {!captions[index].isYou && (
-                <ReportButton key={captions[index].id} captionId={captions[index].id} />
-              )}
+              <div className="flex items-center justify-center gap-3">
+                <HeartButton
+                  key={`heart-${captions[index].id}`}
+                  captionId={captions[index].id}
+                  initialHearted={captions[index].isHearted}
+                  initialCount={captions[index].heartCount}
+                />
+                {!captions[index].isYou && (
+                  <ReportButton key={`report-${captions[index].id}`} captionId={captions[index].id} />
+                )}
+              </div>
             </div>
 
             <button
