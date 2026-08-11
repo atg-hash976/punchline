@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Swords, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReportButton from "./ReportButton";
+import Confetti from "./Confetti";
+import { MAX_VOTES_PER_DAY } from "@/lib/ranking";
 
 type Challenger = { id: string; username: string; city?: string | null; text: string };
 
@@ -11,11 +13,17 @@ type Props = {
   comicId: string;
   onDone: () => void;
   exitLabel?: string;
+  initialVotesCast?: number;
 };
 
-const DOTS_PER_SET = 5;
+const MAX_VOTES = MAX_VOTES_PER_DAY;
 
-export default function VotingArena({ comicId, onDone, exitLabel = "Done voting — browse captions" }: Props) {
+export default function VotingArena({
+  comicId,
+  onDone,
+  exitLabel = "Done voting — browse captions",
+  initialVotesCast = 0,
+}: Props) {
   const [pair, setPair] = useState<Challenger[] | null>(null);
   const [round, setRound] = useState(1);
   const [voting, setVoting] = useState(false);
@@ -23,13 +31,17 @@ export default function VotingArena({ comicId, onDone, exitLabel = "Done voting 
   // The picked card holds a green "burst" for a beat before the loser gets
   // replaced — purely a feel/feedback delay, not tied to the actual request.
   const [winningId, setWinningId] = useState<string | null>(null);
-  // Ephemeral, this-visit-only tally — gives voters a small, achievable goal
-  // (fill 5 dots) rather than an open-ended "keep voting forever" ask. Once
-  // a set fills, it slides away and a fresh empty one takes its place.
-  const [votesCast, setVotesCast] = useState(0);
+  // Seeded from the server's real tally (see /api/comic/today), so leaving
+  // and re-entering the arena — or reloading — resumes with the right dots
+  // filled instead of resetting to 0.
+  const [votesCast, setVotesCast] = useState(initialVotesCast);
   const [showThanks, setShowThanks] = useState(false);
+  const [hasVotedThisVisit, setHasVotedThisVisit] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const alreadyDone = initialVotesCast >= MAX_VOTES;
 
   useEffect(() => {
+    if (alreadyDone) return;
     fetch(`/api/captions/matchup?comicId=${comicId}&count=2`)
       .then((r) => r.json())
       .then((data) => {
@@ -38,6 +50,15 @@ export default function VotingArena({ comicId, onDone, exitLabel = "Done voting 
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Once the final-vote celebration shows, hand control back to the caller
+  // automatically — no need for the voter to tap their way out.
+  useEffect(() => {
+    if (!finished) return;
+    const timeout = setTimeout(onDone, 2600);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished]);
 
   async function handlePick(winner: Challenger, loser: Challenger) {
     if (voting || !pair) return;
@@ -53,13 +74,18 @@ export default function VotingArena({ comicId, onDone, exitLabel = "Done voting 
         body: JSON.stringify({ comicId, winnerCaptionId: winner.id, loserCaptionId: loser.id }),
       });
 
-      setVotesCast((v) => {
-        if (v === 0) {
-          setShowThanks(true);
-          setTimeout(() => setShowThanks(false), 2200);
-        }
-        return v + 1;
-      });
+      const newTotal = votesCast + 1;
+      setVotesCast(newTotal);
+      if (!hasVotedThisVisit) {
+        setHasVotedThisVisit(true);
+        setShowThanks(true);
+        setTimeout(() => setShowThanks(false), 2200);
+      }
+
+      if (newTotal >= MAX_VOTES) {
+        setFinished(true);
+        return;
+      }
 
       const excludeIds = pair.map((c) => c.id).join(",");
       const res = await fetch(
@@ -78,6 +104,46 @@ export default function VotingArena({ comicId, onDone, exitLabel = "Done voting 
       setVoting(false);
       setWinningId(null);
     }
+  }
+
+  if (finished) {
+    return (
+      <div className="relative text-center space-y-4 p-8 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5">
+        <Confetti />
+        <div className="flex justify-center gap-2">
+          {Array.from({ length: MAX_VOTES }).map((_, i) => (
+            <motion.span
+              key={i}
+              initial={{ scale: 1 }}
+              animate={{ scale: [1, 1.7, 1] }}
+              transition={{ duration: 0.55, delay: i * 0.035, ease: "easeOut" }}
+              className="w-2.5 h-2.5 rounded-full bg-forest"
+              style={{ boxShadow: "0 0 10px 3px rgba(74,124,89,0.75)" }}
+            />
+          ))}
+        </div>
+        <p className="font-display text-xl font-bold text-ink">
+          Thank you for helping pick today's winner!
+        </p>
+        <p className="text-sm text-ink-muted">Taking you back to browse…</p>
+      </div>
+    );
+  }
+
+  if (alreadyDone) {
+    return (
+      <div className="text-center space-y-3 p-5 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5">
+        <p className="text-sm text-ink-muted">
+          You've already judged today's captions — thanks for helping!
+        </p>
+        <button
+          onClick={onDone}
+          className="px-5 py-2.5 rounded-full bg-ink text-cream text-sm font-semibold hover:opacity-90 active:scale-95 transition"
+        >
+          Browse captions
+        </button>
+      </div>
+    );
   }
 
   if (unavailable) {
@@ -101,8 +167,6 @@ export default function VotingArena({ comicId, onDone, exitLabel = "Done voting 
   }
 
   const [a, b] = pair;
-  const setIndex = Math.floor(votesCast / DOTS_PER_SET);
-  const filledDots = votesCast % DOTS_PER_SET;
 
   return (
     <div className="space-y-3">
@@ -116,26 +180,15 @@ export default function VotingArena({ comicId, onDone, exitLabel = "Done voting 
       </header>
 
       <div className="flex flex-col items-center gap-1.5">
-        <div className="relative w-full flex justify-center overflow-hidden py-1">
-          <AnimatePresence mode="popLayout" initial={false}>
-            <motion.div
-              key={setIndex}
-              initial={{ x: 48, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -48, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 380, damping: 32 }}
-              className="flex items-center gap-2"
-            >
-              {Array.from({ length: DOTS_PER_SET }).map((_, i) => (
-                <span
-                  key={i}
-                  className={`w-2.5 h-2.5 rounded-full transition-colors duration-300 ${
-                    i < filledDots ? "bg-forest" : "bg-ink/10"
-                  }`}
-                />
-              ))}
-            </motion.div>
-          </AnimatePresence>
+        <div className="flex items-center gap-2">
+          {Array.from({ length: MAX_VOTES }).map((_, i) => (
+            <span
+              key={i}
+              className={`w-2.5 h-2.5 rounded-full transition-colors duration-300 ${
+                i < votesCast ? "bg-forest" : "bg-ink/10"
+              }`}
+            />
+          ))}
         </div>
 
         <AnimatePresence>

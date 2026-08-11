@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateSessionId, hasForfeited } from "@/lib/session";
-import { weightedSampleByUndersampling } from "@/lib/ranking";
+import { weightedSampleByUndersampling, MAX_VOTES_PER_DAY } from "@/lib/ranking";
 
 // ---------------------------------------------------------------------
 // GET /api/captions/matchup?comicId=xxx&excludeIds=a,b&count=1
@@ -84,6 +84,14 @@ export async function POST(req: NextRequest) {
   }
   if (ownCaption && (winnerCaptionId === ownCaption.id || loserCaptionId === ownCaption.id)) {
     return NextResponse.json({ error: "You can't vote on your own caption." }, { status: 403 });
+  }
+
+  const votesSoFar = await prisma.matchup.count({ where: { comicId, sessionId } });
+  if (votesSoFar >= MAX_VOTES_PER_DAY) {
+    return NextResponse.json(
+      { error: "You've already judged the maximum number of matchups today." },
+      { status: 403 }
+    );
   }
 
   const [winner, loser] = await Promise.all([

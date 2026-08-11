@@ -19,12 +19,13 @@ export async function GET() {
   // Resolve this session's own state server-side, so a page reload doesn't
   // forget that this session already opened/submitted/forfeited today's comic.
   const sessionId = getOrCreateSessionId();
-  const [open, ownCaption, streak] = await Promise.all([
+  const [open, ownCaption, streak, votesCast] = await Promise.all([
     prisma.comicOpen.findUnique({
       where: { comicId_sessionId: { comicId: comic.id, sessionId } },
     }),
     prisma.caption.findFirst({ where: { comicId: comic.id, sessionId } }),
     computeStreak(sessionId),
+    prisma.matchup.count({ where: { comicId: comic.id, sessionId } }),
   ]);
 
   return NextResponse.json({
@@ -32,5 +33,6 @@ export async function GET() {
     openedAt: open?.openedAt ?? null,
     unlocked: Boolean(ownCaption) || hasForfeited(comic.id),
     streak,
+    votesCast,
   });
 }

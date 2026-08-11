@@ -11,9 +11,11 @@ import {
   Lock,
   PenLine,
   Swords,
+  CheckCircle2,
 } from "lucide-react";
 import Leaderboard, { LeaderboardEntry } from "./Leaderboard";
 import ReportButton from "./ReportButton";
+import { MAX_VOTES_PER_DAY } from "@/lib/ranking";
 
 type Caption = {
   id: string;
@@ -78,9 +80,11 @@ const TAB_ORDER: Tab[] = TABS.map((t) => t.id);
 
 export default function CaptionFeed({
   comicId,
+  votesCast,
   onStartVoting,
 }: {
   comicId: string;
+  votesCast: number;
   onStartVoting: () => void;
 }) {
   const [tab, setTab] = useState<Tab>("rising");
@@ -148,13 +152,20 @@ export default function CaptionFeed({
   return (
     <div className="space-y-3">
       <div className="flex justify-center">
-        <button
-          onClick={onStartVoting}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-coral text-white text-xs font-semibold shadow-soft hover:bg-coral-dark active:scale-95 transition"
-        >
-          <Swords size={13} strokeWidth={2.5} />
-          Judge two captions
-        </button>
+        {votesCast >= MAX_VOTES_PER_DAY ? (
+          <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-forest-light text-forest-dark text-xs font-semibold">
+            <CheckCircle2 size={13} strokeWidth={2.5} />
+            Thanks for judging!
+          </div>
+        ) : (
+          <button
+            onClick={onStartVoting}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-coral text-white text-xs font-semibold shadow-soft hover:bg-coral-dark active:scale-95 transition"
+          >
+            <Swords size={13} strokeWidth={2.5} />
+            Judge two captions
+          </button>
+        )}
       </div>
 
       <div className="flex justify-center">

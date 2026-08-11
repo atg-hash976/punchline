@@ -2,6 +2,9 @@
 // (see Evan Miller, "How Not To Sort By Average Rating").
 const Z = 1.96;
 
+/** Cap on how many matchups a single session can judge per comic per day. */
+export const MAX_VOTES_PER_DAY = 10;
+
 /**
  * Wilson score lower bound for a binomial proportion. Ranking by this instead
  * of raw win-rate means a caption with 9/10 wins outranks one that's 1/1 —

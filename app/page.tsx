@@ -60,6 +60,9 @@ export default function Home() {
   const [prefillUsername, setPrefillUsername] = useState("");
   const [prefillCity, setPrefillCity] = useState("");
   const [streak, setStreak] = useState(0);
+  // How many matchups this session has judged today — server-truth, so it
+  // survives leaving and re-entering the voting arena (or reloading).
+  const [votesCast, setVotesCast] = useState(0);
 
   useEffect(() => {
     fetch("/api/comic/today")
@@ -72,6 +75,7 @@ export default function Home() {
         setUnlocked(Boolean(d.unlocked));
         setShowLanding(!d.openedAt && !d.unlocked);
         setStreak(d.streak ?? 0);
+        setVotesCast(d.votesCast ?? 0);
 
         if (d.comic) {
           fetch(`/api/comic/results?comicId=${d.comic.id}`)
@@ -120,6 +124,16 @@ export default function Home() {
 
   function handlePlayNow() {
     setShowLanding(false);
+  }
+
+  // Re-checks the server's vote tally so the "Judge two captions" button
+  // reflects however many were actually cast, whether the arena was exited
+  // early or ran all the way to the celebration screen.
+  async function handleVotingDone() {
+    setShowVoting(false);
+    const res = await fetch("/api/comic/today");
+    const d = await res.json();
+    setVotesCast(d.votesCast ?? 0);
   }
 
   async function handleBrowseFromLanding() {
@@ -219,11 +233,16 @@ export default function Home() {
           {showVoting ? (
             <VotingArena
               comicId={comic.id}
-              onDone={() => setShowVoting(false)}
+              initialVotesCast={votesCast}
+              onDone={handleVotingDone}
               exitLabel={submitted ? undefined : "Just browse instead"}
             />
           ) : unlocked ? (
-            <CaptionFeed comicId={comic.id} onStartVoting={() => setShowVoting(true)} />
+            <CaptionFeed
+              comicId={comic.id}
+              votesCast={votesCast}
+              onStartVoting={() => setShowVoting(true)}
+            />
           ) : null}
         </>
       )}
