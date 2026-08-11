@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { freezeEligibleComics } from "@/lib/freeze";
+import { cleanupOldRateLimitHits } from "@/lib/rateLimit";
 
 // Never cache — every invocation must actually check current state.
 export const dynamic = "force-dynamic";
@@ -30,5 +31,6 @@ export async function GET(req: NextRequest) {
   }
 
   const frozen = await freezeEligibleComics();
-  return NextResponse.json({ frozen });
+  const rateLimitHitsPurged = await cleanupOldRateLimitHits();
+  return NextResponse.json({ frozen, rateLimitHitsPurged });
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateSessionId, hasForfeited } from "@/lib/session";
 import { weightedSampleByUndersampling, MAX_VOTES_PER_DAY } from "@/lib/ranking";
+import { checkRateLimit, getClientIp, rateLimitedResponse } from "@/lib/rateLimit";
 
 // ---------------------------------------------------------------------
 // GET /api/captions/matchup?comicId=xxx&excludeIds=a,b&count=1
@@ -62,6 +63,12 @@ export async function GET(req: NextRequest) {
 // submitters, so lurkers help build reliable ranking data too.
 // ---------------------------------------------------------------------
 export async function POST(req: NextRequest) {
+  // Backstop above MAX_VOTES_PER_DAY's per-session cap (10) — sized to give
+  // a few genuine people sharing one IP (a household, an office) headroom,
+  // while still stopping a cleared-cookie script from vote-stuffing.
+  const voteLimit = await checkRateLimit(`vote:${getClientIp(req)}`, 40, 24 * 60 * 60 * 1000);
+  if (!voteLimit.allowed) return rateLimitedResponse(voteLimit.retryAfterSeconds);
+
   const { comicId, winnerCaptionId, loserCaptionId } = await req.json();
   if (!comicId || !winnerCaptionId || !loserCaptionId) {
     return NextResponse.json(

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateSessionId } from "@/lib/session";
+import { checkRateLimit, getClientIp, rateLimitedResponse } from "@/lib/rateLimit";
 
 // ---------------------------------------------------------------------
 // POST /api/captions/report  { captionId }
@@ -10,6 +11,12 @@ import { getOrCreateSessionId } from "@/lib/session";
 // session on the same caption don't inflate the count.
 // ---------------------------------------------------------------------
 export async function POST(req: NextRequest) {
+  // Caps how fast one IP can flag captions — the concern isn't a genuine
+  // heavy user, it's a cleared-cookie script mass-reporting someone's
+  // caption off the board through the admin removal queue.
+  const reportLimit = await checkRateLimit(`report:${getClientIp(req)}`, 20, 24 * 60 * 60 * 1000);
+  if (!reportLimit.allowed) return rateLimitedResponse(reportLimit.retryAfterSeconds);
+
   const { captionId } = await req.json();
   if (!captionId) return NextResponse.json({ error: "captionId required" }, { status: 400 });
 

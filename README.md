@@ -126,10 +126,11 @@ curl -H "Authorization: Bearer $(grep CRON_SECRET .env | cut -d'"' -f2)" http://
    from before this existed don't migrate themselves; re-upload them (or write a
    one-off script pushing `public/comics/*` through `put()`) if that matters to you.
 
-3. **Share image generation.** `ShareModal` currently shares text only. For the full
-   "comic + caption + username + city" image, generate a composed PNG server-side
-   (e.g. an API route using `@vercel/og` or `sharp` to stamp text onto the comic) and
-   share that file via `navigator.share({ files: [...] })` where supported.
+3. ~~**Share image generation.**~~ Done — `lib/shareCard.ts` composes the full
+   "comic + caption + username + city" image client-side via canvas (rounded card,
+   brand-gradient frame, the rainbow Punchline wordmark, comic date), and shares that
+   file via `navigator.share({ files: [...] })` where supported, falling back to a
+   direct download on desktop.
 
 4. ~~**Tier 1 slur list.**~~ Done — `lib/moderation.ts` now uses the
    [`profanease`](https://www.npmjs.com/package/profanease) npm package's `SLUR`
@@ -169,9 +170,14 @@ curl -H "Authorization: Bearer $(grep CRON_SECRET .env | cut -d'"' -f2)" http://
    with an `Authorization: Bearer <CRON_SECRET>` header instead, and drop the
    `vercel.json` file (harmless to leave, but unused off Vercel).
 
-8. **Rate limiting backstop.** Session cookies are the primary anti-abuse mechanism
-   per our accessibility-first design, but they're clearable. Consider adding a
-   secondary IP-based rate limit on submission/matchup-vote endpoints as a backstop.
+8. ~~**Rate limiting backstop.**~~ Done — `lib/rateLimit.ts` adds an IP-keyed backstop
+   (Postgres-backed, no new service to run) on top of the session-cookie limits
+   everywhere abuse actually matters: submitting (10/IP/day), voting (40/IP/day, on
+   top of `MAX_VOTES_PER_DAY`'s 10/session), hearting (60/IP/hour), reporting
+   (20/IP/day), the contact form (5/IP/day), and — the one that actually guards
+   something sensitive — admin login (5/IP/15min, brute-force protection on the one
+   password gate to `/admin`). Old rows are purged daily piggybacking on the existing
+   freeze cron, so nothing new needs its own schedule.
 
 9. **Matchup pairing is uniform-random.** `GET /api/captions/matchup` shuffles all
    eligible captions and takes the front, so early captions and late captions get

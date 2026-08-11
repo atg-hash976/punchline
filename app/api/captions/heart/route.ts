@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateSessionId } from "@/lib/session";
+import { checkRateLimit, getClientIp, rateLimitedResponse } from "@/lib/rateLimit";
 
 // ---------------------------------------------------------------------
 // POST /api/captions/heart  { captionId }
@@ -10,6 +11,9 @@ import { getOrCreateSessionId } from "@/lib/session";
 // repeat taps from the same session don't inflate the count.
 // ---------------------------------------------------------------------
 export async function POST(req: NextRequest) {
+  const heartLimit = await checkRateLimit(`heart:${getClientIp(req)}`, 60, 60 * 60 * 1000);
+  if (!heartLimit.allowed) return rateLimitedResponse(heartLimit.retryAfterSeconds);
+
   const { captionId } = await req.json();
   if (!captionId) return NextResponse.json({ error: "captionId required" }, { status: 400 });
 

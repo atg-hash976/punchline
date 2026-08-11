@@ -140,3 +140,18 @@ model IllustratorInquiry {
   message   String
   createdAt DateTime @default(now())
 }
+
+// IP-keyed rate-limit backstop (see lib/rateLimit.ts) — the session cookie is
+// the primary anti-abuse mechanism elsewhere in this schema, but it's
+// trivially cleared, so anything that matters (submitting, voting, hearting,
+// reporting, admin login, contact) also checks this. One row per hit; a
+// route asks "how many rows for this key in the last N ms" rather than
+// maintaining a running counter, so nothing needs locking. Old rows are
+// purged daily by the freeze cron (lib/rateLimit.ts's cleanupOldRateLimitHits).
+model RateLimitHit {
+  id        String   @id @default(cuid())
+  key       String   // e.g. "submit:203.0.113.4"
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}

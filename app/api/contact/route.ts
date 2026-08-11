@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, getClientIp, rateLimitedResponse } from "@/lib/rateLimit";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -9,6 +10,9 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // no email is sent, this is checked manually for now.
 // ---------------------------------------------------------------------
 export async function POST(req: NextRequest) {
+  const contactLimit = await checkRateLimit(`contact:${getClientIp(req)}`, 5, 24 * 60 * 60 * 1000);
+  if (!contactLimit.allowed) return rateLimitedResponse(contactLimit.retryAfterSeconds);
+
   const { name, email, message } = await req.json();
 
   if (!name?.trim() || !email?.trim() || !message?.trim()) {

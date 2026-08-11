@@ -5,6 +5,7 @@ import { normalizeCaption, isDuplicate } from "@/lib/duplicate";
 import { checkUsername, checkCaptionText } from "@/lib/moderation";
 import { isWithinSubmissionWindow, SUBMISSION_WINDOW_MINUTES } from "@/lib/timing";
 import { wilsonLowerBound } from "@/lib/ranking";
+import { checkRateLimit, getClientIp, rateLimitedResponse } from "@/lib/rateLimit";
 
 const RISING_WINDOW_MINUTES = 30;
 
@@ -100,6 +101,12 @@ export async function GET(req: NextRequest) {
 // POST /api/captions  { comicId, username, city?, text }
 // ---------------------------------------------------------------------
 export async function POST(req: NextRequest) {
+  // One real person only ever needs one submission a day — this generous
+  // per-IP cap is purely a backstop against scripted spam (a cleared session
+  // cookie resets the normal "one caption per comic" gate below).
+  const submitLimit = await checkRateLimit(`submit:${getClientIp(req)}`, 10, 24 * 60 * 60 * 1000);
+  if (!submitLimit.allowed) return rateLimitedResponse(submitLimit.retryAfterSeconds);
+
   const { comicId, username, city, text } = await req.json();
 
   if (!comicId || !username || !text) {
