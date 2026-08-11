@@ -6,6 +6,7 @@ import { Eye } from "lucide-react";
 import ComicCard from "@/components/ComicCard";
 import CountdownTimer from "@/components/CountdownTimer";
 import SubmitCaptionForm from "@/components/SubmitCaptionForm";
+import PreFillForm from "@/components/PreFillForm";
 import CaptionFeed from "@/components/CaptionFeed";
 import ShareModal from "@/components/ShareModal";
 import VotingArena from "@/components/VotingArena";
@@ -53,6 +54,10 @@ export default function Home() {
   // already opened/submitted/forfeited today resumes straight into the game.
   const [showLanding, setShowLanding] = useState(false);
   const [yesterday, setYesterday] = useState<Yesterday>(null);
+  // Filled in before the comic is revealed, so typing your name doesn't
+  // eat into the caption clock — SubmitCaptionForm picks up from here.
+  const [prefillUsername, setPrefillUsername] = useState("");
+  const [prefillCity, setPrefillCity] = useState("");
 
   useEffect(() => {
     fetch("/api/comic/today")
@@ -179,18 +184,28 @@ export default function Home() {
                 windowExpired={windowExpired}
                 onSubmitted={handleSubmitted}
                 onForfeit={handleForfeit}
+                initialUsername={prefillUsername}
+                initialCity={prefillCity}
               />
             </>
           )}
 
           {!openedAt && !unlocked && (
-            <button
-              onClick={handleBrowseFromLanding}
-              className="w-full flex items-center justify-center gap-1.5 text-xs text-ink-muted underline decoration-ink-faint underline-offset-2 hover:text-ink transition"
-            >
-              <Eye size={13} strokeWidth={2.25} />
-              Or, just browse and see what others have said today
-            </button>
+            <>
+              <PreFillForm
+                username={prefillUsername}
+                city={prefillCity}
+                onUsernameChange={setPrefillUsername}
+                onCityChange={setPrefillCity}
+              />
+              <button
+                onClick={handleBrowseFromLanding}
+                className="w-full flex items-center justify-center gap-1.5 text-xs text-ink-muted underline decoration-ink-faint underline-offset-2 hover:text-ink transition"
+              >
+                <Eye size={13} strokeWidth={2.25} />
+                Or, just browse and see what others have said today
+              </button>
+            </>
           )}
 
           {showVoting ? (

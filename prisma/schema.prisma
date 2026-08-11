@@ -113,3 +113,13 @@ model Report {
   @@unique([captionId, sessionId])
   @@index([captionId])
 }
+
+// "Get in touch" submissions from the footer's illustrator link — not
+// surfaced anywhere in the UI yet, just persisted for manual follow-up.
+model IllustratorInquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}

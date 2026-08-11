@@ -57,7 +57,7 @@ export default function PracticeCaptionForm({ onGenerate }: Props) {
         onChange={(e) => setText(e.target.value)}
         placeholder="Your caption…"
         required
-        maxLength={200}
+        maxLength={250}
         rows={3}
         className="w-full text-sm font-mono text-blue-dark bg-card border-2 border-blue rounded-xl2 px-4 py-3 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/30 transition resize-none"
       />

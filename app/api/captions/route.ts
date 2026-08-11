@@ -98,6 +98,9 @@ export async function POST(req: NextRequest) {
   if (!comicId || !username || !text) {
     return NextResponse.json({ error: "comicId, username, and text are required" }, { status: 400 });
   }
+  if (text.length > 250) {
+    return NextResponse.json({ error: "Captions are limited to 250 characters." }, { status: 422 });
+  }
 
   const sessionId = getOrCreateSessionId();
 

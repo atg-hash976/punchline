@@ -26,18 +26,26 @@ type Props = {
 export default function LandingHero({ yesterday, onPlay, onBrowse }: Props) {
   return (
     <div className="space-y-5">
-      <div className="bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5 p-6 text-center space-y-4">
+      <div className="bg-gradient-to-b from-forest-light to-card rounded-xl2 shadow-pop ring-2 ring-forest/30 p-6 text-center space-y-4">
+        <p className="flex items-center justify-center gap-1.5 font-mono text-[11px] tracking-[0.15em] uppercase text-forest-dark">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-forest opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-forest" />
+          </span>
+          Today's challenge
+        </p>
+
         <p className="text-ink leading-snug">
           One comic. One caption.{" "}
-          <span className="font-semibold">{SUBMISSION_WINDOW_MINUTES} minutes</span> to play.
-          Today's challenge is waiting.
+          <span className="font-semibold">{SUBMISSION_WINDOW_MINUTES} minutes</span> to play.{" "}
+          <span className="font-bold">Today's challenge is waiting.</span>
         </p>
 
         <button
           onClick={onPlay}
-          className="w-full flex items-center justify-center gap-1.5 px-5 py-3 rounded-full bg-forest text-white text-sm font-semibold shadow-soft hover:bg-forest-dark active:scale-95 transition"
+          className="w-full flex items-center justify-center gap-2 px-5 py-4 rounded-full bg-forest text-white text-base font-bold shadow-pop hover:bg-forest-dark active:scale-95 transition animate-invite-pulse"
         >
-          <Sparkles size={15} strokeWidth={2.25} />
+          <Sparkles size={18} strokeWidth={2.5} />
           Submit Daily Punchline
         </button>
 
@@ -53,7 +61,7 @@ export default function LandingHero({ yesterday, onPlay, onBrowse }: Props) {
       {yesterday?.champion && (
         <div className="space-y-3">
           <p className="text-center font-mono text-[11px] tracking-[0.15em] uppercase text-ink-muted">
-            Yesterday's cartoon
+            Yesterday's punchline
           </p>
           <div className="rounded-xl2 overflow-hidden shadow-card ring-1 ring-ink/5 bg-card">
             <img src={yesterday.imageUrl} alt="Yesterday's comic" className="w-full" />

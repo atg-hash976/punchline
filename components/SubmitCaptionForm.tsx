@@ -9,11 +9,20 @@ type Props = {
   windowExpired: boolean;
   onSubmitted: (caption: { username: string; city?: string; text: string }) => void;
   onForfeit: () => void;
+  initialUsername?: string;
+  initialCity?: string;
 };
 
-export default function SubmitCaptionForm({ comicId, windowExpired, onSubmitted, onForfeit }: Props) {
-  const [username, setUsername] = useState("");
-  const [city, setCity] = useState("");
+export default function SubmitCaptionForm({
+  comicId,
+  windowExpired,
+  onSubmitted,
+  onForfeit,
+  initialUsername = "",
+  initialCity = "",
+}: Props) {
+  const [username, setUsername] = useState(initialUsername);
+  const [city, setCity] = useState(initialCity);
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -88,7 +97,7 @@ export default function SubmitCaptionForm({ comicId, windowExpired, onSubmitted,
           onChange={(e) => setText(e.target.value)}
           placeholder="Your caption…"
           required
-          maxLength={200}
+          maxLength={250}
           rows={3}
           className="w-full text-sm font-mono text-blue-dark bg-card border-2 border-blue rounded-xl2 pl-10 pr-4 py-3 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/30 transition resize-none"
         />

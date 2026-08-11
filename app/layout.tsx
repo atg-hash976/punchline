@@ -1,5 +1,6 @@
 import "./globals.css";
 import { DM_Sans, DM_Mono, Playfair_Display } from "next/font/google";
+import Footer from "@/components/Footer";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -26,7 +27,10 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${dmSans.variable} ${dmMono.variable} ${playfair.variable}`}>
-      <body className="bg-cream text-ink min-h-screen font-sans antialiased">{children}</body>
+      <body className="bg-cream text-ink min-h-screen font-sans antialiased">
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }
