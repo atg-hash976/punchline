@@ -26,3 +26,19 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ reported: true });
 }
+
+// ---------------------------------------------------------------------
+// DELETE /api/captions/report  { captionId }
+// Un-reports — lets someone correct a misclick. Idempotent: deleting a
+// report that isn't there (already undone, or never existed) is a no-op.
+// ---------------------------------------------------------------------
+export async function DELETE(req: NextRequest) {
+  const { captionId } = await req.json();
+  if (!captionId) return NextResponse.json({ error: "captionId required" }, { status: 400 });
+
+  const sessionId = getOrCreateSessionId();
+
+  await prisma.report.deleteMany({ where: { captionId, sessionId } });
+
+  return NextResponse.json({ reported: false });
+}

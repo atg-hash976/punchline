@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, MapPin, MessageSquareText } from "lucide-react";
+import { User, MapPin, MessageSquareText, Lightbulb } from "lucide-react";
 import { SUBMISSION_WINDOW_MINUTES } from "@/lib/timing";
 
 type Props = {
@@ -90,6 +90,10 @@ export default function SubmitCaptionForm({
           className="w-full text-sm font-mono text-blue-dark bg-card border-2 border-blue rounded-full pl-10 pr-4 py-2.5 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/30 transition"
         />
       </div>
+      <p className="flex items-center justify-center gap-1.5 text-[11px] text-ink-faint text-center">
+        <Lightbulb size={12} strokeWidth={2.25} className="shrink-0" />
+        Check your grammar and spelling — well-written captions perform much better!
+      </p>
       <div className="relative">
         <MessageSquareText size={15} strokeWidth={2.25} className="absolute left-4 top-3.5 text-blue-dark/60" />
         <textarea

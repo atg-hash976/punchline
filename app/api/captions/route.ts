@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
   });
   if (isDuplicate(normalizedText, existing.map((e) => e.normalizedText))) {
     return NextResponse.json(
-      { error: "Someone already submitted that exact caption. Try putting your own spin on it!" },
+      { error: "That caption's already been submitted. Try again!" },
       { status: 409 }
     );
   }
