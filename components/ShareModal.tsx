@@ -8,6 +8,7 @@ import { generateShareCard } from "@/lib/shareCard";
 type Props = {
   caption: { username: string; city?: string | null; text: string; isYou?: boolean };
   imageUrl: string;
+  comicDate: string;
   onClose: () => void;
   heading?: string;
   subheading?: string;
@@ -17,6 +18,7 @@ type Props = {
 export default function ShareModal({
   caption,
   imageUrl,
+  comicDate,
   onClose,
   heading = "Thanks for your submission!",
   subheading = "Would you like to share it?",
@@ -38,6 +40,7 @@ export default function ShareModal({
       username: caption.username,
       city: caption.city,
       isYou: caption.isYou,
+      date: comicDate,
     })
       .then((blob) => {
         if (cancelled) return;

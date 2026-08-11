@@ -30,9 +30,11 @@ type OwnCaption = {
 export default function OwnCaptionCard({
   comicId,
   shareImageUrl,
+  comicDate,
 }: {
   comicId: string;
   shareImageUrl: string;
+  comicDate: string;
 }) {
   const [caption, setCaption] = useState<OwnCaption | null>(null);
   const [sharing, setSharing] = useState(false);
@@ -112,8 +114,9 @@ export default function OwnCaptionCard({
         <ShareModal
           caption={{ username: caption.username, city: caption.city, text: caption.text, isYou: true }}
           imageUrl={shareImageUrl}
-          heading="Your submission"
-          subheading="Show it off!"
+          comicDate={comicDate}
+          heading="Your Daily Punchline"
+          subheading={comicDate}
           celebrate={false}
           onClose={() => setSharing(false)}
         />

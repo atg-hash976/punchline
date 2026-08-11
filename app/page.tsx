@@ -127,6 +127,7 @@ export default function Home() {
   // Lurkers only ever see black-and-white — the color version is the
   // submission reward, so it's only used once this session has one.
   const shareImageUrl = hasSubmittedCaption ? comic.colorImageUrl ?? comic.imageUrl : comic.imageUrl;
+  const comicDate = formatComicDate(new Date(comic.releaseAt));
 
   async function handleForfeit() {
     await fetch("/api/comic/forfeit", {
@@ -191,6 +192,7 @@ export default function Home() {
         <p className="font-mono text-[11px] text-ink-faint">{formatComicDate(new Date(comic.releaseAt))}</p>
         <h1 className="font-display text-3xl font-bold">
           <PunchlineLogo />
+          <sup className="ml-1 align-super font-mono text-[11px] font-normal text-ink-faint">BETA</sup>
         </h1>
         {!showLanding && (
           <Link
@@ -272,12 +274,13 @@ export default function Home() {
           ) : unlocked ? (
             <>
               {hasSubmittedCaption && (
-                <OwnCaptionCard comicId={comic.id} shareImageUrl={shareImageUrl} />
+                <OwnCaptionCard comicId={comic.id} shareImageUrl={shareImageUrl} comicDate={comicDate} />
               )}
               <CaptionFeed
                 comicId={comic.id}
                 votesCast={votesCast}
                 shareImageUrl={shareImageUrl}
+                comicDate={comicDate}
                 onStartVoting={() => setShowVoting(true)}
               />
             </>
@@ -291,6 +294,7 @@ export default function Home() {
         <ShareModal
           caption={{ ...submitted, isYou: true }}
           imageUrl={shareImageUrl}
+          comicDate={comicDate}
           celebrate={false}
           onClose={() => {
             setShowShare(false);

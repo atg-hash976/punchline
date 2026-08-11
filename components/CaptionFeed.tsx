@@ -88,11 +88,13 @@ export default function CaptionFeed({
   comicId,
   votesCast,
   shareImageUrl,
+  comicDate,
   onStartVoting,
 }: {
   comicId: string;
   votesCast: number;
   shareImageUrl: string;
+  comicDate: string;
   onStartVoting: () => void;
 }) {
   const [tab, setTab] = useState<Tab>("rising");
@@ -297,6 +299,7 @@ export default function CaptionFeed({
         <ShareModal
           caption={sharingCaption}
           imageUrl={shareImageUrl}
+          comicDate={comicDate}
           heading="Share this caption"
           subheading={sharingCaption.isYou ? "Show it off!" : "Pass along the laugh"}
           celebrate={false}

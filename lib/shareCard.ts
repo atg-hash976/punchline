@@ -18,6 +18,7 @@ export type ShareCardInput = {
   username: string;
   city?: string | null;
   isYou?: boolean;
+  date: string;
 };
 
 const CARD_WIDTH = 1080;
@@ -34,6 +35,10 @@ const PILL_FONT = "700 24px Menlo, monospace";
 const TAGLINE_FONT = "500 22px Menlo, monospace";
 const TAGLINE_LETTER_SPACING = "4px";
 const TAGLINE_COLOR = "#3868AC";
+// Same mono font as the tagline, one size down and muted — matches the
+// on-site date treatment (font-mono text-[11px] text-ink-faint).
+const DATE_FONT = "500 20px Menlo, monospace";
+const DATE_COLOR = "#B7AFA9";
 const BRAND_FONT = "700 36px Georgia, serif";
 // Same four brand accents as the in-app wordmark (components/PunchlineLogo)
 // and the color-reveal sheen (ComicCard) — starting on red, kept in sync
@@ -96,6 +101,13 @@ function drawLogo(ctx: CanvasRenderingContext2D, centerX: number, y: number) {
     ctx.fillText(text[i], x, y);
     x += ctx.measureText(text[i]).width;
   }
+
+  // Superscript "BETA" — same mono font/color as the on-site date, so it
+  // reads as a badge on the wordmark rather than part of it.
+  ctx.font = "500 16px Menlo, monospace";
+  ctx.fillStyle = "#B7AFA9";
+  ctx.fillText("BETA", x + 6, y - 14);
+
   ctx.textAlign = "center";
 }
 
@@ -165,7 +177,9 @@ export async function generateShareCard(input: ShareCardInput): Promise<Blob> {
     150 + // gap — pushes the brand block down into its own footer band
     50 + // Punchline wordmark
     36 + // gap
-    30; // tight bottom margin — tagline rests right above the card's edge
+    28 + // tagline row
+    28 + // gap
+    30; // tight bottom margin — date rests right above the card's edge
 
   const canvas = document.createElement("canvas");
   canvas.width = CARD_WIDTH;
@@ -218,6 +232,11 @@ export async function generateShareCard(input: ShareCardInput): Promise<Blob> {
   ctx.letterSpacing = TAGLINE_LETTER_SPACING;
   ctx.fillText("DAILY CAPTION CONTEST", CARD_WIDTH / 2, y);
   ctx.letterSpacing = "0px";
+
+  y += 28;
+  ctx.font = DATE_FONT;
+  ctx.fillStyle = DATE_COLOR;
+  ctx.fillText(input.date, CARD_WIDTH / 2, y);
 
   ctx.restore(); // drop the rounded-rect clip before framing
 

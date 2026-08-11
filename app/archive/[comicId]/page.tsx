@@ -106,6 +106,7 @@ export default function ArchiveComicPage({ params }: { params: { comicId: string
         <ShareModal
           caption={{ ...practiceCaption, isYou: true }}
           imageUrl={comic!.imageUrl}
+          comicDate={dateLabelCT(comic!.releaseAt)}
           onClose={() => setPracticeCaption(null)}
           heading="Nice one!"
           subheading="Want to share your take?"
