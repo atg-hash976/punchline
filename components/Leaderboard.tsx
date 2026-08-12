@@ -94,9 +94,9 @@ export default function Leaderboard({ results }: { results: LeaderboardEntry[] }
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.92 }}
             transition={SPRING}
-            className="relative bg-card rounded-xl2 shadow-card ring-2 ring-gold/50 p-5 pt-6 text-center space-y-2"
+            className="relative bg-card rounded-xl2 ring-2 ring-gold/50 p-5 pt-6 text-center space-y-2"
           >
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gold text-white flex items-center justify-center shadow-soft">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gold text-white flex items-center justify-center">
               <Trophy size={16} strokeWidth={2.5} />
             </div>
             <p className="text-lg leading-snug text-ink">"{first.text}"</p>
@@ -129,7 +129,7 @@ export default function Leaderboard({ results }: { results: LeaderboardEntry[] }
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.92 }}
                     transition={SPRING}
-                    className="bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5 p-4 text-center space-y-1.5"
+                    className="bg-card rounded-xl2 ring-1 ring-ink/10 p-4 text-center space-y-1.5"
                   >
                     <div
                       className={`mx-auto w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold font-mono ${
@@ -159,7 +159,7 @@ export default function Leaderboard({ results }: { results: LeaderboardEntry[] }
       )}
 
       {rest.length > 0 && (
-        <div className="bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5 divide-y divide-ink/5 overflow-hidden">
+        <div className="border-t border-ink/10 divide-y divide-ink/10">
           <AnimatePresence initial={false}>
             {rest.map((r) => (
               <motion.div

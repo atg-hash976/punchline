@@ -108,7 +108,7 @@ export default function ShareModal({
           <button
             onClick={handleShare}
             disabled={!cardBlob}
-            className="flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-forest text-white text-sm font-semibold shadow-soft hover:bg-forest-dark active:scale-95 transition disabled:opacity-50"
+            className="flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-forest text-white text-sm font-semibold hover:bg-forest-dark active:scale-95 transition disabled:opacity-50"
           >
             <Share2 size={14} strokeWidth={2.25} />
             Share

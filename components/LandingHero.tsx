@@ -34,7 +34,7 @@ export default function LandingHero({ yesterday, streak, onPlay, onBrowse }: Pro
         </p>
       )}
 
-      <div className="bg-gradient-to-b from-forest-light to-card rounded-xl2 shadow-pop ring-2 ring-forest/30 p-6 text-center space-y-4">
+      <div className="border-t border-ink/10 pt-5 text-center space-y-4">
         <p className="flex items-center justify-center gap-1.5 font-mono text-[11px] tracking-[0.15em] uppercase text-forest-dark">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-forest opacity-75" />
@@ -52,7 +52,7 @@ export default function LandingHero({ yesterday, streak, onPlay, onBrowse }: Pro
 
         <button
           onClick={onPlay}
-          className="w-full flex items-center justify-center gap-2 px-5 py-4 rounded-full bg-forest text-white text-base font-bold shadow-pop hover:bg-forest-dark active:scale-95 transition animate-invite-pulse"
+          className="w-full flex items-center justify-center gap-2 px-5 py-4 rounded-full bg-forest text-white text-base font-bold hover:bg-forest-dark active:scale-95 transition animate-invite-pulse"
         >
           <Sparkles size={18} strokeWidth={2.5} />
           Submit Daily Punchline
@@ -67,16 +67,16 @@ export default function LandingHero({ yesterday, streak, onPlay, onBrowse }: Pro
       </div>
 
       {yesterday?.champion && (
-        <div className="space-y-3">
+        <div className="border-t border-ink/10 pt-5 space-y-3">
           <p className="text-center font-mono text-[11px] tracking-[0.15em] uppercase text-ink-muted">
             Yesterday's punchline
           </p>
-          <div className="rounded-xl2 overflow-hidden shadow-card ring-1 ring-ink/5 bg-card">
+          <div className="rounded-xl2 overflow-hidden ring-1 ring-ink/10 bg-card">
             <img src={yesterday.imageUrl} alt="Yesterday's comic" className="w-full" />
           </div>
 
-          <div className="relative bg-card rounded-xl2 shadow-card ring-2 ring-gold/50 p-5 pt-6 text-center space-y-2">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gold text-white flex items-center justify-center shadow-soft">
+          <div className="relative bg-card rounded-xl2 ring-2 ring-gold/50 p-5 pt-6 text-center space-y-2">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gold text-white flex items-center justify-center">
               <Trophy size={16} strokeWidth={2.5} />
             </div>
             <p className="text-lg leading-snug text-ink">"{yesterday.champion.text}"</p>

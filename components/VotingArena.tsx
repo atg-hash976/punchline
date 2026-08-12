@@ -131,7 +131,7 @@ export default function VotingArena({
 
   if (finished) {
     return (
-      <div className="relative text-center space-y-4 p-8 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5">
+      <div className="relative text-center space-y-4 p-8 bg-card rounded-xl2 ring-1 ring-ink/10">
         <Confetti />
         <div className="flex justify-center gap-2">
           {Array.from({ length: MAX_VOTES }).map((_, i) => (
@@ -155,7 +155,7 @@ export default function VotingArena({
 
   if (alreadyDone) {
     return (
-      <div className="text-center space-y-3 p-5 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5">
+      <div className="text-center space-y-3 p-5 bg-card rounded-xl2 ring-1 ring-ink/10">
         <p className="text-sm text-ink-muted">
           You've already judged today's captions — thanks for helping!
         </p>
@@ -171,7 +171,7 @@ export default function VotingArena({
 
   if (unavailable) {
     return (
-      <div className="text-center space-y-3 p-5 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5">
+      <div className="text-center space-y-3 p-5 bg-card rounded-xl2 ring-1 ring-ink/10">
         <p className="text-sm text-ink-muted">
           Not enough other captions yet to judge — check back soon!
         </p>
@@ -243,12 +243,12 @@ export default function VotingArena({
                 handlePick(c, c.id === a.id ? b : a);
               }
             }}
-            className={`flex flex-col justify-between gap-3 bg-card rounded-xl2 shadow-soft p-4 text-left transition cursor-pointer ${
+            className={`flex flex-col justify-between gap-3 bg-card rounded-xl2 p-4 text-left transition cursor-pointer ${
               voting ? "pointer-events-none" : ""
             } ${
               c.id === winningId
                 ? "ring-2 ring-forest animate-winner-burst"
-                : `ring-1 ring-ink/5 hover:ring-forest/50 hover:bg-forest-light/40 hover:shadow-card active:scale-95 ${
+                : `ring-1 ring-ink/10 hover:ring-forest/50 hover:bg-forest-light/40 active:scale-95 ${
                     voting ? "opacity-40" : ""
                   }`
             }`}
@@ -263,7 +263,7 @@ export default function VotingArena({
             </div>
           </div>
         ))}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-coral text-white text-[10px] font-bold font-mono flex items-center justify-center shadow-soft">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-coral text-white text-[10px] font-bold font-mono flex items-center justify-center">
           VS
         </div>
       </div>

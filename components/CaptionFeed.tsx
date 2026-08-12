@@ -143,7 +143,7 @@ export default function CaptionFeed({
 
   if (locked) {
     return (
-      <div className="flex flex-col items-center gap-2 text-center text-ink-muted text-sm p-8 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5">
+      <div className="flex flex-col items-center gap-2 text-center text-ink-muted text-sm p-8 bg-card rounded-xl2 ring-1 ring-ink/10">
         <Lock size={18} strokeWidth={2} className="text-ink-faint" />
         Submit a caption (or choose to browse) to see what others wrote.
       </div>
@@ -174,7 +174,7 @@ export default function CaptionFeed({
         ) : (
           <button
             onClick={onStartVoting}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-coral text-white text-xs font-semibold shadow-soft hover:bg-coral-dark active:scale-95 transition"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-coral text-white text-xs font-semibold hover:bg-coral-dark active:scale-95 transition"
           >
             <Swords size={13} strokeWidth={2.5} />
             Judge two captions
@@ -183,13 +183,13 @@ export default function CaptionFeed({
       </div>
 
       <div className="flex justify-center">
-        <div className="inline-flex gap-1 p-1 bg-card rounded-full shadow-soft ring-1 ring-ink/5">
+        <div className="inline-flex gap-1 p-1 bg-card rounded-full ring-1 ring-ink/10">
           {TABS.map(({ id, label, icon: Icon, active, inactive }) => (
             <button
               key={id}
               onClick={() => handleTabClick(id)}
               className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition ${
-                tab === id ? `${active} shadow-soft` : inactive
+                tab === id ? active : inactive
               }`}
             >
               <Icon size={13} strokeWidth={2.25} />
@@ -204,7 +204,7 @@ export default function CaptionFeed({
         className={`space-y-3 ${slideDir === "right" ? "animate-slide-in-right" : "animate-slide-in-left"}`}
       >
       {captions.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 text-center text-ink-muted text-sm p-8 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5">
+        <div className="flex flex-col items-center gap-2 text-center text-ink-muted text-sm p-8 bg-card rounded-xl2 ring-1 ring-ink/10">
           <PenLine size={18} strokeWidth={2} className="text-ink-faint" />
           No captions yet — be the first!
         </div>
@@ -221,7 +221,7 @@ export default function CaptionFeed({
         </>
       ) : (
         <>
-          <div className="bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5 p-5 flex items-center gap-2">
+          <div className="bg-card rounded-xl2 ring-1 ring-ink/10 p-5 flex items-center gap-2">
             <button
               onClick={() => setIndex((i) => Math.max(0, i - 1))}
               disabled={index === 0}

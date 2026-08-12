@@ -16,7 +16,7 @@ export default function TermsPage() {
         </Link>
       </header>
 
-      <div className="bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5 p-6 space-y-5 text-sm text-ink leading-relaxed">
+      <div className="space-y-5 text-sm text-ink leading-relaxed">
         <section className="space-y-1.5">
           <h2 className="font-display text-lg font-bold text-ink">How it works</h2>
           <p>
@@ -26,7 +26,7 @@ export default function TermsPage() {
           </p>
         </section>
 
-        <section className="space-y-1.5">
+        <section className="space-y-1.5 border-t border-ink/10 pt-5">
           <h2 className="font-display text-lg font-bold text-ink">How the winner is determined</h2>
           <p>
             We don't rank captions by raw vote count. After submitting, players are shown pairs of
@@ -48,7 +48,7 @@ export default function TermsPage() {
           </p>
         </section>
 
-        <section className="space-y-1.5">
+        <section className="space-y-1.5 border-t border-ink/10 pt-5">
           <h2 className="font-display text-lg font-bold text-ink">Your captions</h2>
           <p>
             Captions are limited to 250 characters. All submissions become the property of
@@ -81,7 +81,7 @@ export default function TermsPage() {
           </p>
         </section>
 
-        <section className="space-y-1.5">
+        <section className="space-y-1.5 border-t border-ink/10 pt-5">
           <h2 className="font-display text-lg font-bold text-ink">Changes</h2>
           <p>
             This is a small, evolving project — these terms and the contest mechanics may change

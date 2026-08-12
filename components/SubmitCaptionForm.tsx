@@ -52,7 +52,7 @@ export default function SubmitCaptionForm({
 
   if (windowExpired) {
     return (
-      <div className="text-center space-y-3 p-5 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5">
+      <div className="text-center space-y-3 p-5 bg-card rounded-xl2 ring-1 ring-ink/10">
         <p className="text-sm text-ink-muted">
           Your {SUBMISSION_WINDOW_MINUTES} minutes are up! You can still browse today's top captions.
         </p>
@@ -69,7 +69,7 @@ export default function SubmitCaptionForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-2.5 p-5 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5"
+      className="space-y-2.5 p-5 bg-card rounded-xl2 ring-1 ring-ink/10"
     >
       <div className="relative">
         <User size={15} strokeWidth={2.25} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-dark/60" />
@@ -127,7 +127,7 @@ export default function SubmitCaptionForm({
         <button
           type="submit"
           disabled={submitting}
-          className="px-5 py-2.5 rounded-full bg-forest text-white text-sm font-semibold shadow-soft hover:bg-forest-dark active:scale-95 transition disabled:opacity-50"
+          className="px-5 py-2.5 rounded-full bg-forest text-white text-sm font-semibold hover:bg-forest-dark active:scale-95 transition disabled:opacity-50"
         >
           {submitting ? "Submitting…" : "Submit caption"}
         </button>

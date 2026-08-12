@@ -16,7 +16,7 @@ export default function AboutAiPage() {
         </Link>
       </header>
 
-      <div className="bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5 p-6 space-y-4 text-sm text-ink leading-relaxed">
+      <div className="space-y-4 text-sm text-ink leading-relaxed">
         <p>
           Currently, the images for Punchline are generated with the assistance of AI. As a
           small, independent, free game, the resources to commission a hand-illustrated comic

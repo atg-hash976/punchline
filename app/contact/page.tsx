@@ -49,7 +49,7 @@ export default function ContactPage() {
       </header>
 
       {sent ? (
-        <div className="bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5 p-6 text-center space-y-2">
+        <div className="bg-card rounded-xl2 ring-1 ring-ink/10 p-6 text-center space-y-2">
           <CheckCircle2 size={28} strokeWidth={2} className="mx-auto text-forest" />
           <p className="font-display text-lg font-bold text-ink">Thanks for reaching out!</p>
           <p className="text-sm text-ink-muted">We'll get back to you soon.</p>
@@ -63,7 +63,7 @@ export default function ContactPage() {
 
           <form
             onSubmit={handleSubmit}
-            className="space-y-2.5 p-5 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5"
+            className="space-y-2.5 p-5 bg-card rounded-xl2 ring-1 ring-ink/10"
           >
             <input
               value={name}
@@ -95,7 +95,7 @@ export default function ContactPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-forest text-white text-sm font-semibold shadow-soft hover:bg-forest-dark active:scale-95 transition disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-forest text-white text-sm font-semibold hover:bg-forest-dark active:scale-95 transition disabled:opacity-50"
             >
               <Send size={14} strokeWidth={2.25} />
               {submitting ? "Sending…" : "Send"}

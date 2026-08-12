@@ -16,7 +16,7 @@ export default function AboutPage() {
         </Link>
       </header>
 
-      <div className="bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5 p-6 space-y-4 text-sm text-ink leading-relaxed">
+      <div className="space-y-4 text-sm text-ink leading-relaxed">
         <p>
           Punchline is a test of quick, creative thinking. Show the world your sense of humor
           while giving your brain a quick workout — three minutes, that's all you've got to
@@ -28,7 +28,7 @@ export default function AboutPage() {
         </p>
       </div>
 
-      <p className="text-center">
+      <p className="text-center border-t border-ink/10 pt-5">
         <Link
           href="/about/ai"
           className="text-xs text-ink-muted underline decoration-ink-faint underline-offset-2 hover:text-ink transition"

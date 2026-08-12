@@ -18,7 +18,7 @@ export default function ResultsReveal({
 }) {
   return (
     <div className="space-y-4">
-      <div className="rounded-xl2 overflow-hidden shadow-card ring-1 ring-ink/5 bg-card">
+      <div className="rounded-xl2 overflow-hidden ring-1 ring-ink/10 bg-card">
         <img src={imageUrl} alt="Comic" className="w-full" />
       </div>
 

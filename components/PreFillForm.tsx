@@ -16,7 +16,7 @@ type Props = {
  */
 export default function PreFillForm({ username, city, onUsernameChange, onCityChange }: Props) {
   return (
-    <div className="space-y-2.5 p-5 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5">
+    <div className="space-y-2.5 p-5 bg-card rounded-xl2 ring-1 ring-ink/10">
       <p className="text-xs text-ink-muted text-center">
         Fill in your name now — the clock starts once you reveal the comic.
       </p>

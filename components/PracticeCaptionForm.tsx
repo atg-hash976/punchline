@@ -29,7 +29,7 @@ export default function PracticeCaptionForm({ onGenerate }: Props) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-2.5 p-5 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5"
+      className="space-y-2.5 p-5 bg-card rounded-xl2 ring-1 ring-ink/10"
     >
       <h3 className="font-display text-lg font-bold text-ink text-center">
         Write your own — just for fun
@@ -75,7 +75,7 @@ export default function PracticeCaptionForm({ onGenerate }: Props) {
 
       <button
         type="submit"
-        className="w-full flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-forest text-white text-sm font-semibold shadow-soft hover:bg-forest-dark active:scale-95 transition"
+        className="w-full flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-forest text-white text-sm font-semibold hover:bg-forest-dark active:scale-95 transition"
       >
         <Sparkles size={14} strokeWidth={2.25} />
         Generate & share

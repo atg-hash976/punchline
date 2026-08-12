@@ -56,7 +56,7 @@ export default function ComicCard({
   }
 
   return (
-    <div className="relative rounded-xl2 overflow-hidden shadow-card bg-card ring-1 ring-ink/5">
+    <div className="relative rounded-xl2 overflow-hidden bg-card ring-1 ring-ink/10">
       <img
         src={imageUrl}
         alt="Today's comic"

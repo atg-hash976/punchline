@@ -49,12 +49,12 @@ export default function ArchivePage() {
           No past days yet — check back once today's contest wraps up!
         </p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="border-t border-ink/10 divide-y divide-ink/10">
           {entries.map((entry) => (
             <li key={entry.id}>
               <Link
                 href={`/archive/${entry.id}`}
-                className="flex items-center gap-3 bg-card rounded-xl2 shadow-soft ring-1 ring-ink/5 p-3 hover:ring-blue/40 transition"
+                className="flex items-center gap-3 p-3 hover:bg-ink/5 transition"
               >
                 <img
                   src={entry.imageUrl}
