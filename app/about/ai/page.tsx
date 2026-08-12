@@ -4,9 +4,6 @@ export default function AboutAiPage() {
   return (
     <main className="max-w-lg mx-auto px-4 py-8 space-y-6">
       <header className="text-center space-y-1">
-        <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-blue-dark">
-          Daily Caption Contest
-        </p>
         <h1 className="font-display text-3xl font-bold text-ink">A Note on the Use of AI</h1>
         <Link
           href="/about"

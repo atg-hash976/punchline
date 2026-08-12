@@ -30,13 +30,7 @@ const CAPTION_FONT = "italic 500 44px Georgia, serif";
 const CAPTION_LINE_HEIGHT = 57;
 const META_FONT = "500 33px Menlo, monospace";
 const PILL_FONT = "700 24px Menlo, monospace";
-// Same weight/tracking/color as the "DAILY CAPTION CONTEST" eyebrow in the
-// site header (font-mono text-[11px] tracking-[0.2em] uppercase text-blue-dark).
-const TAGLINE_FONT = "500 22px Menlo, monospace";
-const TAGLINE_LETTER_SPACING = "4px";
-const TAGLINE_COLOR = "#3868AC";
-// Same mono font as the tagline, one size down and muted — matches the
-// on-site date treatment (font-mono text-[11px] text-ink-faint).
+// Matches the on-site date treatment (font-mono text-[11px] text-ink-faint).
 const DATE_FONT = "500 20px Menlo, monospace";
 const DATE_COLOR = "#B7AFA9";
 const BRAND_FONT = "700 36px Georgia, serif";
@@ -91,22 +85,38 @@ function brandGradient(ctx: CanvasRenderingContext2D, x0: number, y0: number, x1
   return gradient;
 }
 
-function drawLogo(ctx: CanvasRenderingContext2D, centerX: number, y: number) {
-  const text = "Punchline";
-  ctx.font = BRAND_FONT;
-  ctx.textAlign = "left";
-  let x = centerX - ctx.measureText(text).width / 2;
+// Draws one word with its own fresh red-first color cycle, returning the x
+// position right after its last letter (so the caller can chain a second
+// word, or place something like the BETA badge right after it).
+function drawWord(ctx: CanvasRenderingContext2D, text: string, x: number, y: number): number {
   for (let i = 0; i < text.length; i++) {
     ctx.fillStyle = LOGO_COLORS[i % LOGO_COLORS.length];
     ctx.fillText(text[i], x, y);
     x += ctx.measureText(text[i]).width;
   }
+  return x;
+}
+
+function drawLogo(ctx: CanvasRenderingContext2D, centerX: number, y: number) {
+  ctx.font = BRAND_FONT;
+  ctx.textAlign = "left";
+
+  // "Daily" restarts the same red-first cycle rather than continuing
+  // "Punchline"'s index, so both words open on the same note — matches
+  // the in-app wordmark (components/PunchlineLogo).
+  const spaceWidth = ctx.measureText(" ").width;
+  const totalWidth =
+    ctx.measureText("Punchline").width + spaceWidth + ctx.measureText("Daily").width;
+  let x = centerX - totalWidth / 2;
+  x = drawWord(ctx, "Punchline", x, y);
+  x += spaceWidth;
+  const endX = drawWord(ctx, "Daily", x, y);
 
   // Superscript "BETA" — same mono font/color as the on-site date, so it
   // reads as a badge on the wordmark rather than part of it.
   ctx.font = "500 16px Menlo, monospace";
   ctx.fillStyle = "#B7AFA9";
-  ctx.fillText("BETA", x + 6, y - 14);
+  ctx.fillText("BETA", endX + 6, y - 14);
 
   ctx.textAlign = "center";
 }
@@ -175,10 +185,8 @@ export async function generateShareCard(input: ShareCardInput): Promise<Blob> {
     16 + // gap
     52 + // attribution row
     150 + // gap — pushes the brand block down into its own footer band
-    50 + // Punchline wordmark
+    50 + // Punchline Daily wordmark
     36 + // gap
-    28 + // tagline row
-    28 + // gap
     30; // tight bottom margin — date rests right above the card's edge
 
   const canvas = document.createElement("canvas");
@@ -219,13 +227,6 @@ export async function generateShareCard(input: ShareCardInput): Promise<Blob> {
   drawLogo(ctx, CARD_WIDTH / 2, y);
 
   y += 36;
-  ctx.font = TAGLINE_FONT;
-  ctx.fillStyle = TAGLINE_COLOR;
-  ctx.letterSpacing = TAGLINE_LETTER_SPACING;
-  ctx.fillText("DAILY CAPTION CONTEST", CARD_WIDTH / 2, y);
-  ctx.letterSpacing = "0px";
-
-  y += 28;
   ctx.font = DATE_FONT;
   ctx.fillStyle = DATE_COLOR;
   ctx.fillText(input.date, CARD_WIDTH / 2, y);
