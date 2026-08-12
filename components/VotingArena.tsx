@@ -133,15 +133,18 @@ export default function VotingArena({
     return (
       <div className="relative text-center space-y-4 p-8 bg-card rounded-xl2 ring-1 ring-ink/10">
         <Confetti />
+        <p className="flex items-center justify-center gap-1.5 font-mono text-[11px] tracking-[0.15em] uppercase text-forest-dark">
+          <Swords size={13} strokeWidth={2.5} />
+          {MAX_VOTES} of {MAX_VOTES} judged
+        </p>
         <div className="flex justify-center gap-2">
           {Array.from({ length: MAX_VOTES }).map((_, i) => (
             <motion.span
               key={i}
-              initial={{ scale: 1 }}
-              animate={{ scale: [1, 1.7, 1] }}
-              transition={{ duration: 0.55, delay: i * 0.035, ease: "easeOut" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: i * 0.04, ease: "easeOut" }}
               className="w-2.5 h-2.5 rounded-full bg-forest"
-              style={{ boxShadow: "0 0 10px 3px rgba(74,124,89,0.75)" }}
             />
           ))}
         </div>
