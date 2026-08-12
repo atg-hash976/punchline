@@ -1,6 +1,7 @@
 import "./globals.css";
 import { DM_Sans, DM_Mono, Playfair_Display } from "next/font/google";
 import Footer from "@/components/Footer";
+import { Analytics } from "@vercel/analytics/next";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-cream text-ink min-h-screen font-sans antialiased">
         {children}
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
