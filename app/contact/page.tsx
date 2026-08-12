@@ -71,7 +71,7 @@ export default function ContactPage() {
               placeholder="Name"
               required
               maxLength={80}
-              className="w-full text-sm font-mono text-blue-dark bg-card border-2 border-blue rounded-full px-4 py-2.5 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/30 transition"
+              className="w-full text-sm font-mono text-ink bg-cream border border-ink/15 rounded-full px-4 py-2.5 placeholder:text-ink-faint placeholder:font-mono focus:outline-none focus:border-blue focus:ring-2 focus:ring-blue/15 transition"
             />
             <input
               value={email}
@@ -80,7 +80,7 @@ export default function ContactPage() {
               placeholder="Email"
               required
               maxLength={120}
-              className="w-full text-sm font-mono text-blue-dark bg-card border-2 border-blue rounded-full px-4 py-2.5 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/30 transition"
+              className="w-full text-sm font-mono text-ink bg-cream border border-ink/15 rounded-full px-4 py-2.5 placeholder:text-ink-faint placeholder:font-mono focus:outline-none focus:border-blue focus:ring-2 focus:ring-blue/15 transition"
             />
             <textarea
               value={message}
@@ -89,7 +89,7 @@ export default function ContactPage() {
               required
               maxLength={2000}
               rows={5}
-              className="w-full text-sm font-mono text-blue-dark bg-card border-2 border-blue rounded-xl2 px-4 py-3 placeholder:text-blue-dark/50 placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue/30 transition resize-none"
+              className="w-full text-sm font-mono text-ink bg-cream border border-ink/15 rounded-xl2 px-4 py-3 placeholder:text-ink-faint placeholder:font-mono focus:outline-none focus:border-blue focus:ring-2 focus:ring-blue/15 transition resize-none"
             />
             {error && <p className="text-coral-dark text-xs font-medium">{error}</p>}
             <button
