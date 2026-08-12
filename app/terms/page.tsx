@@ -49,24 +49,6 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-1.5">
-          <h2 className="font-display text-lg font-bold text-ink">Identity &amp; accounts</h2>
-          <p>
-            There's no login. We identify you with an anonymous browser cookie, used only to
-            enforce "one caption per comic" and to know which captions are yours. It isn't a
-            security boundary — clearing your cookies just resets those limits for your browser.
-          </p>
-        </section>
-
-        <section className="space-y-1.5">
-          <h2 className="font-display text-lg font-bold text-ink">Moderation</h2>
-          <p>
-            Captions are automatically screened for slurs, profanity, and spam before they're
-            posted. Any player can report a caption they think crosses the line, and reported
-            captions are reviewed and may be removed at our discretion.
-          </p>
-        </section>
-
-        <section className="space-y-1.5">
           <h2 className="font-display text-lg font-bold text-ink">Your captions</h2>
           <p>
             Captions are limited to 250 characters. All submissions become the property of
